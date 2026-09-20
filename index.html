@@ -1,0 +1,2107 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NeylaConnect 241</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,Helvetica,sans-serif;background:#0A0F1C;color:#fff;padding-bottom:70px;overflow-x:hidden}
+.splash{position:fixed;inset:0;background:#0A0F1C;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:99999}
+.splash.hide{display:none}
+.flagbar{display:flex;height:6px;width:140px;border-radius:3px;overflow:hidden;margin-bottom:20px}
+.flagbar span{flex:1}
+.fg{background:#009E60}
+.fy{background:#FCD116}
+.fb{background:#003DA5}
+h1{font-size:26px;font-weight:800}
+.yellow{color:#FCD116}
+.sub{color:#94A3B8;font-size:12px;margin-top:6px}
+.spin{width:34px;height:34px;border:3px solid #1E293B;border-top-color:#009E60;border-radius:50%;animation:spin 1s linear infinite;margin-top:20px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.page{display:none;padding:16px;max-width:520px;margin:0 auto}
+.page.on{display:block}
+.page.full{padding:0;max-width:none}
+
+.nav{position:fixed;bottom:0;left:0;right:0;background:#111827;border-top:1px solid #1E293B;display:flex;padding:8px 0 10px;z-index:100;max-width:520px;margin:0 auto}
+.nav.off{display:none}
+.nav button{flex:1;background:none;border:none;color:#94A3B8;font-size:10px;padding:5px;cursor:pointer;position:relative;font-family:inherit}
+.nav button .ic{font-size:19px;display:block;margin-bottom:2px;font-weight:700}
+.nav button.act{color:#FCD116}
+.bd2{position:absolute;top:2px;right:25%;background:#EF4444;color:#fff;border-radius:10px;font-size:9px;font-weight:700;padding:1px 5px;min-width:16px}
+
+.hd{display:flex;align-items:center;gap:12px;padding:6px 0 16px}
+.hd h1{font-size:19px;margin:0}
+.hd .sub{color:#94A3B8;font-size:12px;margin-top:2px}
+.bk{width:38px;height:38px;border-radius:50%;background:#111827;border:1px solid #1E293B;color:#fff;font-size:16px;cursor:pointer;flex-shrink:0}
+
+.roleGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}
+.role{border:2px solid #1E293B;border-radius:12px;padding:12px 6px;text-align:center;cursor:pointer;background:#111827}
+.role.sel{border-color:#009E60;background:rgba(0,158,96,0.15)}
+.role .ic{font-size:22px;display:block;margin-bottom:4px;font-weight:700;color:#FCD116}
+.role .nm{font-weight:700;font-size:11px}
+.role .ds{font-size:9px;color:#94A3B8;margin-top:2px}
+
+.inp{width:100%;padding:12px 14px;background:#111827;border:1.5px solid #1E293B;border-radius:12px;color:#fff;font-size:14px;outline:none;margin-top:8px;font-family:inherit}
+.inp:focus{border-color:#009E60}
+select.inp{appearance:none;padding-right:36px}
+textarea.inp{min-height:70px;resize:none;font-family:inherit}
+
+.lbl{font-size:11px;color:#94A3B8;text-transform:uppercase;font-weight:600;display:block;margin-top:12px;margin-bottom:4px}
+
+.btn{width:100%;padding:13px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;color:#fff;margin-top:10px;font-family:inherit}
+.btnG{background:#009E60}
+.btnY{background:#FCD116;color:#0A0F1C}
+.btnB{background:#003DA5}
+.btnO{background:transparent;border:1.5px solid #334155}
+.btnSm{width:auto;padding:7px 12px;font-size:12px;margin:0}
+
+.card{background:#111827;border-radius:14px;padding:14px;margin-bottom:10px;border:1px solid #1E293B}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.fw{font-weight:700}
+.ct{font-weight:700;font-size:14px}
+.cs{color:#94A3B8;font-size:12px;margin-top:4px}
+.prc{color:#FCD116;font-weight:700;font-size:14px}
+.prcL{font-size:19px}
+
+.bdg{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.bgG{background:rgba(16,185,129,0.2);color:#34D399}
+.bgB{background:rgba(37,99,235,0.25);color:#93C5FD}
+.bgO{background:rgba(245,158,11,0.2);color:#FBBF24}
+.bgR{background:rgba(239,68,68,0.2);color:#F87171}
+
+.hero{height:200px;border-radius:18px;overflow:hidden;margin-bottom:14px;position:relative;background:#111827}
+.heroSlider{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.3s}
+.heroSlider.act{opacity:1}
+.heroOv{position:absolute;inset:0;background:linear-gradient(180deg,transparent 30%,rgba(0,0,0,0.88));display:flex;flex-direction:column;justify-content:flex-end;padding:16px;z-index:2}
+.hero h2{font-size:19px;margin-bottom:2px;position:relative;z-index:3}
+.hero p{font-size:11px;opacity:0.95;position:relative;z-index:3}
+
+.srvGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px;background:#111827;border-radius:16px;border:1px solid #1E293B;margin:12px 0}
+.srvItem{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:6px 2px;border-radius:10px}
+.srvItem:active{background:rgba(0,158,96,0.15)}
+.srvIc{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;background:linear-gradient(135deg,rgba(0,158,96,0.25),rgba(0,61,165,0.25));border:1px solid rgba(0,158,96,0.3);font-weight:700;color:#FCD116}
+.srvLb{font-size:9px;font-weight:600;text-align:center;color:#CBD5E1}
+
+.sec{display:flex;justify-content:space-between;align-items:center;margin:18px 0 8px}
+.sec h2{font-size:15px;font-weight:700}
+.sec .lnk{color:#FCD116;font-size:12px;cursor:pointer;font-weight:600}
+
+.prGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.prCard{position:relative;height:120px;border-radius:14px;overflow:hidden;background:#111827;cursor:pointer}
+.prBg{position:absolute;inset:0;background-size:cover;background-position:center}
+.prTxt{position:absolute;bottom:8px;left:10px;right:10px;z-index:2}
+.prT{font-weight:700;font-size:12px}
+.prS{font-size:10px;color:#CBD5E1;margin-top:2px}
+
+.hScroll{display:flex;gap:10px;overflow-x:auto;padding:4px 0 10px;margin:0 -16px;padding-left:16px;padding-right:16px}
+.hScroll::-webkit-scrollbar{display:none}
+.hCard{flex-shrink:0;width:150px;border-radius:14px;overflow:hidden;background:#111827;border:1px solid #1E293B;cursor:pointer}
+.hCard .im{width:100%;height:95px;background-size:cover;background-position:center}
+.hCard .tt{padding:8px;font-weight:700;font-size:11px;text-align:center}
+
+.vidSec{margin:14px 0;border-radius:16px;overflow:hidden;position:relative;height:170px;background:#111827;cursor:pointer}
+.vidSec img{width:100%;height:100%;object-fit:cover;opacity:0.75}
+.vidOv{position:absolute;inset:0;background:linear-gradient(180deg,transparent 30%,rgba(0,0,0,0.9));display:flex;flex-direction:column;justify-content:flex-end;padding:16px;z-index:2}
+.playBtn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:52px;height:52px;border-radius:50%;background:rgba(0,158,96,0.9);display:flex;align-items:center;justify-content:center;font-size:20px;z-index:3;color:#fff;font-weight:700}
+.vidSec h3{font-size:15px;margin-bottom:2px;z-index:3;position:relative}
+.vidSec p{font-size:11px;opacity:0.9;z-index:3;position:relative}
+
+.mapWrap{position:relative;width:100%;height:calc(100vh - 70px);overflow:hidden}
+#mapArea,#trackArea{width:100%;height:100%;background:#0A0F1C}
+.mapTop{position:absolute;top:12px;left:12px;right:12px;z-index:600;display:flex;gap:6px;flex-wrap:wrap}
+.mapBtn{background:rgba(17,24,39,0.95);border:1px solid #1E293B;color:#fff;padding:8px 11px;border-radius:10px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
+.mapBtn.pri{background:#009E60;border-color:#009E60}
+.mapBtn.lv{background:#EF4444;border-color:#EF4444}
+.modeBar{position:absolute;top:54px;left:12px;right:12px;z-index:600;display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+.modeBar::-webkit-scrollbar{display:none}
+.modeBtn{flex-shrink:0;background:rgba(17,24,39,0.95);border:1px solid #1E293B;color:#fff;padding:7px 11px;border-radius:10px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
+.modeBtn.act{background:#009E60;border-color:#009E60}
+.mapSrc{position:absolute;top:100px;left:12px;right:12px;z-index:600;background:rgba(17,24,39,0.97);border:1px solid #1E293B;border-radius:12px;padding:0 12px;display:flex;align-items:center;gap:6px;height:44px}
+.mapSrc input{flex:1;background:none;border:none;color:#fff;font-size:13px;outline:none;font-family:inherit;height:100%}
+.mapSrc .go{background:#009E60;border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+.mapBottom{position:absolute;bottom:80px;left:12px;right:12px;z-index:600}
+.mapCard{background:rgba(17,24,39,0.97);border:1px solid #1E293B;border-radius:14px;padding:12px}
+.mapCard.off{display:none}
+#searchRes{position:absolute;top:150px;left:12px;right:12px;z-index:700;background:rgba(17,24,39,0.98);border:1px solid #1E293B;border-radius:12px;max-height:280px;overflow-y:auto;display:none}
+#searchRes.on{display:block}
+#searchRes .it{padding:11px 14px;border-bottom:1px solid #1E293B;cursor:pointer;font-size:13px}
+#searchRes .nm{font-weight:600}
+#searchRes .co{font-size:11px;color:#94A3B8;margin-top:2px}
+
+.mark{background:transparent;border:none}
+.mark .dot{width:12px;height:12px;border-radius:50%;background:#009E60;border:2px solid #fff}
+.mark .dot.m{width:16px;height:16px;background:#FCD116}
+.mark .dot.q{width:9px;height:9px;background:#8B5CF6}
+.mark .lbl{font-size:10px;color:#fff;font-weight:700;text-shadow:0 1px 3px #000;margin-top:3px;background:rgba(0,0,0,0.6);padding:2px 6px;border-radius:6px;display:inline-block}
+.gpsMark .pin{width:20px;height:20px;border-radius:50%;background:#3B82F6;border:3px solid #fff}
+.lvMark .core{width:36px;height:36px;border-radius:50%;background:#009E60;border:3px solid #fff;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;font-weight:800}
+
+.prog{height:8px;background:#1E293B;border-radius:4px;margin-top:12px;overflow:hidden}
+.progF{height:100%;background:#009E60;width:0;transition:width 0.9s;border-radius:4px}
+.tl{margin-top:14px;padding-left:26px;position:relative}
+.tl:before{content:"";position:absolute;left:8px;top:8px;bottom:8px;width:2px;background:#1E293B}
+.tlS{padding:7px 0;font-size:12px;color:#94A3B8;position:relative}
+.tlS.dn{color:#fff}
+.tlS:before{content:"";position:absolute;left:-22px;top:11px;width:11px;height:11px;border-radius:50%;background:#334155;border:2px solid #0A0F1C}
+.tlS.dn:before{background:#009E60}
+
+.emp{text-align:center;padding:36px 18px;color:#94A3B8;font-size:13px}
+.emp .ic{font-size:44px;display:block;margin-bottom:10px;opacity:0.4;font-weight:700;color:#FCD116}
+.emp .tt{font-weight:700;color:#fff;font-size:14px;margin-bottom:5px}
+
+.otpRow{display:flex;gap:6px;justify-content:center;margin:18px 0}
+.otpB{width:44px;height:54px;border-radius:12px;background:#111827;border:2px solid #1E293B;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700}
+.otpB.on{border-color:#009E60;background:rgba(0,158,96,0.1)}
+.otpH{position:absolute;opacity:0;pointer-events:none}
+
+.seats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:14px;background:#111827;border-radius:14px;margin:12px 0}
+.seat{aspect-ratio:1;background:#1E293B;border:2px solid #334155;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;cursor:pointer;color:#fff}
+.seat.tkn{background:#1F2937;color:#4B5563;cursor:not-allowed}
+.seat.sel{background:#009E60;border-color:#009E60}
+
+.qrBox{background:#fff;color:#000;padding:18px;border-radius:14px;text-align:center;margin:14px 0}
+
+.toast{position:fixed;bottom:85px;left:50%;transform:translateX(-50%);background:#009E60;color:#fff;padding:12px 20px;border-radius:22px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:0.3s;z-index:99999;white-space:nowrap;max-width:90%;text-align:center}
+.toast.on{opacity:1}
+.toast.err{background:#EF4444}
+
+.foot{text-align:center;color:#94A3B8;font-size:11px;margin-top:24px;padding:16px 0;border-top:1px solid #1E293B;line-height:1.7}
+.foot b{color:#FCD116}
+.mt{margin-top:12px}
+
+.payOpt{display:flex;align-items:center;gap:12px;padding:12px;background:#111827;border:2px solid #1E293B;border-radius:12px;cursor:pointer;margin-bottom:8px}
+.payOpt.sel{border-color:#009E60;background:rgba(0,158,96,0.1)}
+.payOpt .pic{font-size:22px;font-weight:800;color:#FCD116;width:30px;text-align:center}
+
+.notifCard{background:#111827;border-left:4px solid #EF4444;border-radius:12px;padding:12px;margin-bottom:10px}
+.callBanner{background:linear-gradient(135deg,#009E60,#007A4A);padding:14px;border-radius:14px;margin-bottom:12px;text-align:center}
+
+.imgCard{background:#111827;border-radius:14px;overflow:hidden;border:1px solid #1E293B;margin-bottom:10px;cursor:pointer}
+.imgCard .im{width:100%;height:140px;background-size:cover;background-position:center}
+.imgCard .bd{padding:12px}
+.imgCard .tt{font-weight:700;font-size:14px;margin-bottom:4px}
+.imgCard .mt2{color:#94A3B8;font-size:12px;margin-top:5px}
+.imgCard .prRow{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid #1E293B}
+
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.stat{background:#111827;border-radius:12px;padding:12px;border-left:3px solid #009E60}
+.stat .lb{font-size:10px;color:#94A3B8;text-transform:uppercase}
+.stat .vl{font-size:17px;font-weight:800;margin-top:4px}
+
+.moyenCard{background:#111827;border-radius:14px;padding:12px;margin-bottom:10px;border-left:4px solid #009E60}
+.moyenCard .badgeDef{background:#009E60;color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+
+.marq{display:flex;gap:12px;overflow-x:auto;padding:6px 0 10px;margin:0 -16px;padding-left:16px;padding-right:16px;background:linear-gradient(90deg,rgba(0,158,96,0.05),rgba(0,61,165,0.05))}
+.marq::-webkit-scrollbar{display:none}
+.marqCard{flex-shrink:0;width:170px;height:110px;border-radius:12px;overflow:hidden;position:relative}
+.marqCard .bg{position:absolute;inset:0;background-size:cover;background-position:center}
+.marqCard .tt{position:absolute;bottom:6px;left:8px;right:8px;color:#fff;font-weight:700;font-size:11px;text-shadow:0 1px 3px #000;z-index:2}
+</style>
+</head>
+<body>
+
+<div class="splash" id="splash">
+  <div class="flagbar"><span class="fg"></span><span class="fy"></span><span class="fb"></span></div>
+  <h1>NeylaConnect <span class="yellow">241</span></h1>
+  <p class="sub">Le Gabon connecte</p>
+  <div class="spin"></div>
+  <p class="sub" style="position:absolute;bottom:30px;font-size:10px">Concu par <b style="color:#FCD116">Damien (Starly Koumba)</b></p>
+</div>
+
+<!-- LOGIN -->
+<div class="page on" id="pgLogin">
+  <div style="text-align:center;padding:14px 0">
+    <div class="flagbar" style="margin:0 auto 14px"><span class="fg"></span><span class="fy"></span><span class="fb"></span></div>
+    <h1>NeylaConnect <span class="yellow">241</span></h1>
+    <p class="sub" style="margin-top:4px">Choisissez votre profil</p>
+  </div>
+  <div class="roleGrid">
+    <div class="role sel" data-role="client" onclick="pickRole(this,'client')"><span class="ic">C</span><div class="nm">Client</div><div class="ds">Commander</div></div>
+    <div class="role" data-role="resto" onclick="pickRole(this,'resto')"><span class="ic">R</span><div class="nm">Restaurant</div><div class="ds">Menu</div></div>
+    <div class="role" data-role="hotel" onclick="pickRole(this,'hotel')"><span class="ic">H</span><div class="nm">Hotel</div><div class="ds">Chambres</div></div>
+    <div class="role" data-role="livreur" onclick="pickRole(this,'livreur')"><span class="ic">L</span><div class="nm">Livreur</div><div class="ds">Zones</div></div>
+    <div class="role" data-role="bus" onclick="pickRole(this,'bus')"><span class="ic">B</span><div class="nm">Bus</div><div class="ds">Trajets</div></div>
+    <div class="role" data-role="taxi" onclick="pickRole(this,'taxi')"><span class="ic">T</span><div class="nm">Taxi</div><div class="ds">Courses</div></div>
+    <div class="role" data-role="magasin" onclick="pickRole(this,'magasin')"><span class="ic">M</span><div class="nm">Magasin</div><div class="ds">Produits</div></div>
+    <div class="role" data-role="salon" onclick="pickRole(this,'salon')"><span class="ic">S</span><div class="nm">Salon</div><div class="ds">Coiffure</div></div>
+    <div class="role" data-role="snack" onclick="pickRole(this,'snack')"><span class="ic">K</span><div class="nm">Snack</div><div class="ds">Fast food</div></div>
+    <div class="role" data-role="boite" onclick="pickRole(this,'boite')"><span class="ic">N</span><div class="nm">Boite</div><div class="ds">Nuit</div></div>
+  </div>
+  <label class="lbl">Telephone</label>
+  <input class="inp" id="phone" type="tel" placeholder="+241 01 23 45 67">
+  <button class="btn btnG" onclick="sendCode()">Recevoir le code SMS</button>
+  <p class="sub" style="text-align:center;margin:12px 0">- ou -</p>
+  <label class="lbl">Adresse email</label>
+  <input class="inp" id="emailInput" type="email" placeholder="exemple@mail.com">
+  <button class="btn btnB" onclick="sendEmailCode()">Recevoir le code email</button>
+  <p class="sub" style="text-align:center;margin:12px 0">- ou -</p>
+  <button class="btn btnO" onclick="social('Google')">Continuer avec Google</button>
+  <button class="btn btnO" onclick="social('Apple')">Continuer avec Apple</button>
+  <button class="btn btnO" onclick="social('Facebook')">Continuer avec Facebook</button>
+  <div class="foot">Concepteur : <b>Damien (Starly Koumba)</b></div>
+</div>
+
+<!-- OTP -->
+<div class="page" id="pgOtp">
+  <div class="hd"><button class="bk" onclick="show('login')">&#8592;</button><h1>Verification</h1></div>
+  <div class="card"><span class="cs" id="otpInfo">Code envoye</span></div>
+  <div class="otpRow">
+    <div class="otpB"></div><div class="otpB"></div><div class="otpB"></div>
+    <div class="otpB"></div><div class="otpB"></div><div class="otpB"></div>
+  </div>
+  <input class="otpH" id="otpIn" maxlength="6" type="tel" oninput="otpChange(this.value)" autofocus>
+  <button class="btn btnG" onclick="verify()">Confirmer</button>
+  <p class="sub" style="text-align:center;margin-top:14px;font-size:12px">Demo : tape <b style="color:#FCD116">123456</b></p>
+</div>
+
+<!-- HOME -->
+<div class="page" id="pgHome">
+  <div class="hd">
+    <div><h1>Bonjour <span id="hName">Utilisateur</span></h1><p class="sub" id="hCity">Libreville, Gabon</p></div>
+    <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#003DA5,#009E60);display:flex;align-items:center;justify-content:center;font-weight:700;border:2px solid #FCD116;margin-left:auto;overflow:hidden" id="hAvatar">U</div>
+  </div>
+
+  <div class="hero" id="heroBox">
+    <div class="heroSlider act" style="background-image:url('https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=900')"></div>
+    <div class="heroSlider" style="background-image:url('https://images.unsplash.com/photo-1564760055775-d63b17a55c44?w=900')"></div>
+    <div class="heroSlider" style="background-image:url('https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=900')"></div>
+    <div class="heroSlider" style="background-image:url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=900')"></div>
+    <div class="heroSlider" style="background-image:url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=900')"></div>
+    <div class="heroSlider" style="background-image:url('https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=900')"></div>
+    <div class="heroSlider" style="background-image:url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=900')"></div>
+    <div class="heroSlider" style="background-image:url('https://images.unsplash.com/photo-1605281317010-fe5ffe798166?w=900')"></div>
+    <div class="heroSlider" style="background-image:url('https://images.unsplash.com/photo-1444464666168-49d633b86797?w=900')"></div>
+    <div class="heroSlider" style="background-image:url('https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=900')"></div>
+    <div class="heroSlider" style="background-image:url('https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=900')"></div>
+    <div class="heroSlider" style="background-image:url('https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=900')"></div>
+    <div class="heroOv">
+      <h2 id="heroTitle">Bienvenue au Gabon</h2>
+      <p id="heroSub">De Bikele a Tchibanga, vivez l aventure</p>
+    </div>
+  </div>
+
+  <div class="sec"><h2>Services</h2></div>
+  <div class="srvGrid">
+    <div class="srvItem" onclick="show('resto')"><div class="srvIc">R</div><div class="srvLb">Restos</div></div>
+    <div class="srvItem" onclick="show('hotel')"><div class="srvIc">H</div><div class="srvLb">Hotels</div></div>
+    <div class="srvItem" onclick="show('bus')"><div class="srvIc">B</div><div class="srvLb">Bus</div></div>
+    <div class="srvItem" onclick="show('taxi')"><div class="srvIc">T</div><div class="srvLb">Taxi</div></div>
+    <div class="srvItem" onclick="show('colis')"><div class="srvIc">P</div><div class="srvLb">Colis</div></div>
+    <div class="srvItem" onclick="show('map')"><div class="srvIc">M</div><div class="srvLb">Carte</div></div>
+    <div class="srvItem" onclick="show('tracking')"><div class="srvIc">S</div><div class="srvLb">Suivi</div></div>
+    <div class="srvItem" onclick="show('factures')"><div class="srvIc">F</div><div class="srvLb">Factures</div></div>
+  </div>
+
+  <div class="sec"><h2>Destinations populaires</h2><span class="lnk" onclick="show('map')">Voir tout</span></div>
+  <div class="prGrid">
+    <div class="prCard" onclick="goToCity(0.4162,9.4673,'Libreville')">
+      <div class="prBg" style="background-image:url('https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?w=400')"></div>
+      <div class="prTxt"><div class="prT">Libreville</div><div class="prS">Capitale</div></div>
+    </div>
+    <div class="prCard" onclick="goToCity(-0.7193,8.7815,'Port-Gentil')">
+      <div class="prBg" style="background-image:url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400')"></div>
+      <div class="prTxt"><div class="prT">Port-Gentil</div><div class="prS">Economique</div></div>
+    </div>
+    <div class="prCard" onclick="goToCity(-1.6333,13.5833,'Franceville')">
+      <div class="prBg" style="background-image:url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400')"></div>
+      <div class="prTxt"><div class="prT">Franceville</div><div class="prS">Haut Ogooue</div></div>
+    </div>
+    <div class="prCard" onclick="goToCity(-2.9333,10.9833,'Tchibanga')">
+      <div class="prBg" style="background-image:url('https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=400')"></div>
+      <div class="prTxt"><div class="prT">Tchibanga</div><div class="prS">Nyanga</div></div>
+    </div>
+  </div>
+
+  <div class="sec"><h2>Le Gabon en images</h2><span class="lnk">Defiler</span></div>
+  <div class="marq">
+    <div class="marqCard"><div class="bg" style="background-image:url('https://images.unsplash.com/photo-1564760055775-d63b17a55c44?w=400')"></div><div class="tt">Faune sauvage</div></div>
+    <div class="marqCard"><div class="bg" style="background-image:url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400')"></div><div class="tt">Foret equatoriale</div></div>
+    <div class="marqCard"><div class="bg" style="background-image:url('https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=400')"></div><div class="tt">Fleuve Ogooue</div></div>
+    <div class="marqCard"><div class="bg" style="background-image:url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400')"></div><div class="tt">Plages</div></div>
+    <div class="marqCard"><div class="bg" style="background-image:url('https://images.unsplash.com/photo-1605281317010-fe5ffe798166?w=400')"></div><div class="tt">Port</div></div>
+    <div class="marqCard"><div class="bg" style="background-image:url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=400')"></div><div class="tt">Aeroport</div></div>
+    <div class="marqCard"><div class="bg" style="background-image:url('https://images.unsplash.com/photo-1444464666168-49d633b86797?w=400')"></div><div class="tt">Oiseaux</div></div>
+    <div class="marqCard"><div class="bg" style="background-image:url('https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400')"></div><div class="tt">Routes</div></div>
+    <div class="marqCard"><div class="bg" style="background-image:url('https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=400')"></div><div class="tt">Grumiers</div></div>
+    <div class="marqCard"><div class="bg" style="background-image:url('https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?w=400')"></div><div class="tt">Villes</div></div>
+  </div>
+
+  <div class="sec"><h2>Decouvrir le Gabon</h2></div>
+  <div class="vidSec" onclick="toast('Video bientot disponible')">
+    <img src="https://images.unsplash.com/photo-1516426122078-c23e76319801?w=900">
+    <div class="vidOv"><h3>Le Gabon sauvage</h3><p>Elephants, gorilles, forets, fleuves</p></div>
+    <div class="playBtn">></div>
+  </div>
+  <div class="vidSec" onclick="toast('Video bientot disponible')">
+    <img src="https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=900">
+    <div class="vidOv"><h3>L ocean Atlantique</h3><p>Plages, lagunes, mangrove</p></div>
+    <div class="playBtn">></div>
+  </div>
+  <div class="vidSec" onclick="toast('Video bientot disponible')">
+    <img src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=900">
+    <div class="vidOv"><h3>Routes forestieres</h3><p>Grumiers, transports, pistes</p></div>
+    <div class="playBtn">></div>
+  </div>
+
+  <div class="sec"><h2>Villes du Gabon</h2></div>
+  <div class="hScroll">
+    <div class="hCard" onclick="goToCity(0.4162,9.4673,'Libreville')"><div class="im" style="background-image:url('https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?w=400')"></div><div class="tt">Libreville</div></div>
+    <div class="hCard" onclick="goToCity(-0.7193,8.7815,'Port-Gentil')"><div class="im" style="background-image:url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400')"></div><div class="tt">Port-Gentil</div></div>
+    <div class="hCard" onclick="goToCity(-1.6333,13.5833,'Franceville')"><div class="im" style="background-image:url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400')"></div><div class="tt">Franceville</div></div>
+    <div class="hCard" onclick="goToCity(1.5993,11.5793,'Oyem')"><div class="im" style="background-image:url('https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=400')"></div><div class="tt">Oyem</div></div>
+    <div class="hCard" onclick="goToCity(-0.7,10.2333,'Lambarene')"><div class="im" style="background-image:url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400')"></div><div class="tt">Lambarene</div></div>
+    <div class="hCard" onclick="goToCity(-2.9333,10.9833,'Tchibanga')"><div class="im" style="background-image:url('https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=400')"></div><div class="tt">Tchibanga</div></div>
+    <div class="hCard" onclick="goToCity(-2.2167,11.4667,'Lebamba')"><div class="im" style="background-image:url('https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400')"></div><div class="tt">Lebamba</div></div>
+    <div class="hCard" onclick="goToCity(-2.65,10.05,'Gamba')"><div class="im" style="background-image:url('https://images.unsplash.com/photo-1426604966848-d7adac402bff?w=400')"></div><div class="tt">Gamba</div></div>
+  </div>
+
+  <div class="foot">2025 NeylaConnect 241<br>Concepteur : <b>Damien (Starly Koumba)</b></div>
+</div>
+
+<!-- CARTE -->
+<div class="page full" id="pgMap">
+  <div class="mapWrap">
+    <div id="mapArea"></div>
+    <div class="mapTop">
+      <button class="mapBtn pri" onclick="centerGabon()">Gabon</button>
+      <button class="mapBtn" id="btnGps" onclick="toggleGps()">GPS</button>
+      <button class="mapBtn lv" id="btnLive" onclick="toggleLive()">Live</button>
+      <button class="mapBtn" onclick="worldView()">Monde</button>
+    </div>
+    <div class="modeBar">
+      <button class="modeBtn act" onclick="setMode('2d',this)">2D</button>
+      <button class="modeBtn" onclick="setMode('3d',this)">3D</button>
+      <button class="modeBtn" onclick="setMode('4d',this)">4D</button>
+      <button class="modeBtn" onclick="setMode('satellite',this)">Satellite</button>
+      <button class="modeBtn" onclick="setMode('hybrid',this)">Hybride</button>
+      <button class="modeBtn" onclick="setMode('terrain',this)">Terrain</button>
+    </div>
+    <div class="mapSrc">
+      <span style="color:#94A3B8">?</span>
+      <input id="mapSearch" placeholder="Ville ou pays du monde..." oninput="searchWorld(this.value)" onkeydown="if(event.key==='Enter')searchNow()">
+      <button class="go" onclick="searchNow()">OK</button>
+    </div>
+    <div id="searchRes"></div>
+    <div class="mapBottom"><div class="mapCard off" id="mapInfo"></div></div>
+  </div>
+</div>
+
+<!-- SUIVI -->
+<div class="page full" id="pgTracking">
+  <div style="position:relative;height:50vh">
+    <div id="trackArea"></div>
+    <div class="mapTop">
+      <button class="mapBtn" style="background:rgba(17,24,39,0.95)" onclick="show('home')">&#8592;</button>
+      <button class="mapBtn lv">EN DIRECT</button>
+      <button class="mapBtn" onclick="recenterTrack()">Recentrer</button>
+    </div>
+  </div>
+  <div style="padding:16px;max-width:520px;margin:0 auto">
+    <div class="row"><span class="fw" style="font-size:15px">Suivi commande</span><span class="prc prcL" id="liveEta">ETA 15 min</span></div>
+    <p class="cs">Commande NC24100001 - Livreur Pierre</p>
+    <div class="prog"><div class="progF" id="liveBar"></div></div>
+    <div class="tl">
+      <div class="tlS dn">Commande confirmee</div>
+      <div class="tlS dn">En preparation</div>
+      <div class="tlS" id="tlRoute">En route vers vous</div>
+      <div class="tlS" id="tlDone">Livree</div>
+    </div>
+    <div class="card mt"><div class="fw" style="font-size:12px">Position livreur</div><div class="cs" id="livePos">Chargement...</div></div>
+  </div>
+</div>
+
+<!-- RESTO LISTE -->
+<div class="page" id="pgResto">
+  <div class="hd"><button class="bk" onclick="show('home')">&#8592;</button><div><h1>Restaurants</h1><p class="sub">Saveurs du Gabon</p></div></div>
+  <div id="restoList"></div>
+</div>
+
+<!-- RESTO DETAIL -->
+<div class="page" id="pgRestoDetail">
+  <div class="hd"><button class="bk" onclick="show('resto')">&#8592;</button><h1 id="rdName">Restaurant</h1></div>
+  <p class="sub" id="rdInfo"></p>
+  <div id="rdCall" class="mt"></div>
+  <div class="sec"><h2>Menu</h2></div>
+  <div id="rdMenu"></div>
+  <button class="btn btnG" onclick="show('panier')">Voir panier (<span id="cartCount">0</span>)</button>
+</div>
+
+<!-- PANIER -->
+<div class="page" id="pgPanier">
+  <div class="hd"><button class="bk" onclick="show('restoDetail')">&#8592;</button><h1>Panier</h1></div>
+  <div id="panierList"></div>
+  <label class="lbl">Quartier livraison</label>
+  <select class="inp" id="pQuartier"></select>
+  <button class="btn btnO btnSm mt" onclick="show('addQuartier')">+ Ajouter quartier</button>
+  <label class="lbl">Votre numero (obligatoire)</label>
+  <input class="inp" id="pTelClient" type="tel" placeholder="+241 ...">
+  <div class="card" style="background:rgba(0,158,96,0.1);border-color:rgba(0,158,96,0.3)">
+    <div class="fw" style="font-size:12px">Le vendeur sera paye sur :</div>
+    <div class="cs" id="payInfoText">Chargement...</div>
+  </div>
+  <label class="lbl">Votre moyen de paiement</label>
+  <div id="payOpts">
+    <div class="payOpt sel" onclick="pickPay(this,'Airtel Money')"><span class="pic">A</span><div><div class="fw">Airtel Money</div><div class="cs">Paiement mobile</div></div></div>
+    <div class="payOpt" onclick="pickPay(this,'Moov Money')"><span class="pic">M</span><div><div class="fw">Moov Money</div><div class="cs">Paiement mobile</div></div></div>
+    <div class="payOpt" onclick="pickPay(this,'Especes')"><span class="pic">E</span><div><div class="fw">Especes</div><div class="cs">A la livraison</div></div></div>
+    <div class="payOpt" onclick="pickPay(this,'Carte')"><span class="pic">C</span><div><div class="fw">Carte bancaire</div><div class="cs">Visa Mastercard</div></div></div>
+  </div>
+  <div class="card mt">
+    <div class="row"><span class="cs">Sous-total</span><span id="pSous">0 F</span></div>
+    <div class="row mt"><span class="cs">Livraison</span><span id="pLivr">0 F</span></div>
+    <div class="row mt" style="border-top:1px solid #1E293B;padding-top:10px"><span class="fw">TOTAL</span><span class="prc prcL" id="pTotal">0 F</span></div>
+  </div>
+  <button class="btn btnG" onclick="validerCommande()">Valider et envoyer au vendeur</button>
+</div>
+
+<!-- HOTEL -->
+<div class="page" id="pgHotel">
+  <div class="hd"><button class="bk" onclick="show('home')">&#8592;</button><div><h1>Hotels et Motels</h1></div></div>
+  <div id="hotelList"></div>
+</div>
+<div class="page" id="pgHotelDetail">
+  <div class="hd"><button class="bk" onclick="show('hotel')">&#8592;</button><h1 id="hdName">Hotel</h1></div>
+  <p class="sub" id="hdInfo"></p>
+  <div id="hdCall" class="mt"></div>
+  <div id="hdRooms" class="mt"></div>
+</div>
+
+<!-- BUS -->
+<div class="page" id="pgBus">
+  <div class="hd"><button class="bk" onclick="show('home')">&#8592;</button><div><h1>Bus</h1></div></div>
+  <div style="display:flex;gap:10px">
+    <div style="flex:1"><label class="lbl">Depart</label><input class="inp" id="busFrom" oninput="renderBus()"></div>
+    <div style="flex:1"><label class="lbl">Arrivee</label><input class="inp" id="busTo" oninput="renderBus()"></div>
+  </div>
+  <div id="busList" class="mt"></div>
+</div>
+<div class="page" id="pgBusSeat">
+  <div class="hd"><button class="bk" onclick="show('bus')">&#8592;</button><div><h1 id="bsTitle">Sieges</h1><p class="sub" id="bsInfo"></p></div></div>
+  <div class="card" id="bsBusInfo"></div>
+  <div class="seats" id="seatGrid"></div>
+  <div class="card"><div class="row"><span class="fw">Places choisies</span><span class="prc" id="bsCount">0</span></div></div>
+  <label class="lbl">Votre numero (obligatoire)</label>
+  <input class="inp" id="bsTelClient" type="tel">
+  <button class="btn btnG" onclick="confirmerBillets()">Confirmer la reservation</button>
+</div>
+<div class="page" id="pgBillet">
+  <div class="hd"><button class="bk" onclick="show('bus')">&#8592;</button><h1>Billet confirme</h1></div>
+  <div class="callBanner">
+    <div style="font-size:14px;font-weight:700;margin-bottom:6px">Appelez pour confirmer</div>
+    <div class="cs" style="color:rgba(255,255,255,0.85)" id="billetTelInfo"></div>
+    <button class="btn btnY mt" id="btnAppelChauffeur">Appeler le chauffeur</button>
+  </div>
+  <div class="qrBox" id="qrContent"></div>
+  <div class="card" id="billetDetails"></div>
+</div>
+
+<!-- COLIS -->
+<div class="page" id="pgColis">
+  <div class="hd"><button class="bk" onclick="show('home')">&#8592;</button><div><h1>Envoyer un colis</h1></div></div>
+  <label class="lbl">Votre nom</label><input class="inp" id="colFrom">
+  <label class="lbl">Votre tel</label><input class="inp" id="colTelFrom" type="tel">
+  <label class="lbl">Destinataire</label><input class="inp" id="colTo">
+  <label class="lbl">Tel destinataire</label><input class="inp" id="colTel" type="tel">
+  <label class="lbl">Quartier</label><select class="inp" id="colQuartier"></select>
+  <button class="btn btnO btnSm mt" onclick="show('addQuartier')">+ Ajouter quartier</button>
+  <label class="lbl">Adresse</label><input class="inp" id="colAdr">
+  <label class="lbl">Description</label><textarea class="inp" id="colDesc"></textarea>
+  <label class="lbl">Poids (kg)</label><input class="inp" id="colPoids" type="number">
+  <button class="btn btnG" onclick="envoyerColis()">Envoyer le colis</button>
+  <button class="btn btnO" onclick="show('colisSuivi')">Suivre un colis</button>
+</div>
+<div class="page" id="pgColisSuivi">
+  <div class="hd"><button class="bk" onclick="show('colis')">&#8592;</button><h1>Suivi colis</h1></div>
+  <input class="inp" id="colisSearch" placeholder="NC24112345">
+  <button class="btn btnB" onclick="chercherColis()">Rechercher</button>
+  <div id="colisResult" class="mt"></div>
+</div>
+
+<!-- TAXI -->
+<div class="page" id="pgTaxi">
+  <div class="hd"><button class="bk" onclick="show('home')">&#8592;</button><div><h1>Taxi</h1></div></div>
+  <label class="lbl">Depart</label><select class="inp" id="taxiFrom"></select>
+  <label class="lbl">Destination</label><input class="inp" id="taxiDest">
+  <label class="lbl">Votre numero</label><input class="inp" id="taxiTel" type="tel">
+  <button class="btn btnY" onclick="commanderTaxi()">Trouver un chauffeur</button>
+</div>
+
+<!-- FACTURES -->
+<div class="page" id="pgFactures">
+  <div class="hd"><button class="bk" onclick="show('home')">&#8592;</button><h1>Mes factures</h1></div>
+  <div id="facturesList"></div>
+</div>
+<div class="page" id="pgFactureDetail">
+  <div class="hd"><button class="bk" onclick="show('factures')">&#8592;</button><h1>Facture</h1></div>
+  <div class="card" id="factureContent"></div>
+</div>
+
+<!-- ADD QUARTIER -->
+<div class="page" id="pgAddQuartier">
+  <div class="hd"><button class="bk" onclick="show('home')">&#8592;</button><div><h1>Ajouter un quartier</h1></div></div>
+  <label class="lbl">Nom</label><input class="inp" id="qNom">
+  <label class="lbl">Ville</label><input class="inp" id="qVille">
+  <label class="lbl">Province</label>
+  <select class="inp" id="qProvince">
+    <option>Estuaire</option><option>Ogooue Maritime</option><option>Haut Ogooue</option>
+    <option>Woleu Ntem</option><option>Moyen Ogooue</option><option>Ngounie</option>
+    <option>Nyanga</option><option>Ogooue Lolo</option><option>Ogooue Ivindo</option>
+  </select>
+  <label class="lbl">GPS optionnel</label><input class="inp" id="qGps">
+  <button class="btn btnO btnSm mt" onclick="getGps('qGps')">Ma position</button>
+  <button class="btn btnG" onclick="ajouterQuartier()">Ajouter</button>
+</div>
+
+<!-- LIVREUR -->
+<div class="page" id="pgLivreur">
+  <div class="hd"><div><h1>Espace livreur</h1><p class="sub" id="livName"></p></div><div style="width:40px;height:40px;border-radius:50%;background:#009E60;display:flex;align-items:center;justify-content:center;font-weight:700;margin-left:auto" id="livAvatar">L</div></div>
+  <div class="card" id="onlineCard" style="cursor:pointer" onclick="toggleOnline()">
+    <div class="row"><div><div class="fw" id="onlineTxt">Hors ligne</div><div class="cs" id="onlineHint">Touchez pour activer</div></div><div style="font-size:26px;font-weight:800;color:#94A3B8" id="onlineIcon">X</div></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="lb">Gains</div><div class="vl" id="livGains">0 F</div></div>
+    <div class="stat"><div class="lb">Courses</div><div class="vl" id="livCourses">0</div></div>
+    <div class="stat"><div class="lb">Note</div><div class="vl">4.8</div></div>
+    <div class="stat"><div class="lb">Zones</div><div class="vl" id="livZonesCount">0</div></div>
+  </div>
+  <div class="sec"><h2>Ma zone de livraison</h2></div><div id="myZones"></div>
+  <button class="btn btnB btnSm" style="width:100%" onclick="show('livreurZone')">Gerer mes zones</button>
+  <div class="sec"><h2>Mes tarifs</h2></div><div id="myTarifs"></div>
+  <button class="btn btnY btnSm" style="width:100%" onclick="show('livreurTarifs')">Modifier mes tarifs</button>
+  <div class="sec"><h2>Courses disponibles</h2></div><div id="coursesList"></div>
+</div>
+<div class="page" id="pgLivreurZone">
+  <div class="hd"><button class="bk" onclick="show('livreur')">&#8592;</button><h1>Ma zone</h1></div>
+  <div id="zoneList" class="mt"></div>
+  <button class="btn btnO btnSm mt" style="width:100%" onclick="show('addQuartier')">+ Ajouter quartier</button>
+  <button class="btn btnG" onclick="saveZones()">Enregistrer</button>
+</div>
+<div class="page" id="pgLivreurTarifs">
+  <div class="hd"><button class="bk" onclick="show('livreur')">&#8592;</button><h1>Mes tarifs</h1></div>
+  <div id="tarifList" class="mt"></div>
+  <button class="btn btnG" onclick="saveTarifs()">Enregistrer</button>
+</div>
+
+<!-- NOTIFS -->
+<div class="page" id="pgNotifs">
+  <div class="hd"><h1>Notifications</h1></div>
+  <div id="notifsList"></div>
+</div>
+
+<!-- RESTO PRO -->
+<div class="page" id="pgRestoPro">
+  <div class="hd"><div><h1>Mon restaurant</h1></div><div style="width:40px;height:40px;border-radius:50%;background:#009E60;display:flex;align-items:center;justify-content:center;font-weight:700;margin-left:auto">R</div></div>
+  <div id="restoProContent"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+    <button class="btn btnG btnSm" style="width:100%" onclick="show('restoInfo')">Infos</button>
+    <button class="btn btnY btnSm" style="width:100%" onclick="show('restoMenu')">Menu</button>
+    <button class="btn btnB btnSm" style="width:100%" onclick="show('restoLivraison')">Livraison</button>
+    <button class="btn btnO btnSm" style="width:100%" onclick="show('notifs')">Commandes</button>
+  </div>
+  <div class="sec"><h2>Commandes recues</h2></div><div id="restoOrders"></div>
+</div>
+<div class="page" id="pgRestoInfo">
+  <div class="hd"><button class="bk" onclick="show('restoPro')">&#8592;</button><h1>Infos restaurant</h1></div>
+  <label class="lbl">Nom</label><input class="inp" id="riNom">
+  <div style="display:flex;gap:10px">
+    <div style="flex:1"><label class="lbl">Ville</label><input class="inp" id="riVille"></div>
+    <div style="flex:1"><label class="lbl">Quartier</label><input class="inp" id="riQuartier"></div>
+  </div>
+  <label class="lbl">Cuisine</label><input class="inp" id="riCuisine">
+  <label class="lbl">Telephone (obligatoire)</label><input class="inp" id="riTel" type="tel">
+  <label class="lbl">GPS</label><input class="inp" id="riGps">
+  <button class="btn btnO btnSm mt" onclick="getGps('riGps')">Ma position</button>
+  <label class="lbl">Photo URL</label><input class="inp" id="riPhoto">
+  <button class="btn btnG" onclick="saveRestoInfo()">Enregistrer</button>
+</div>
+<div class="page" id="pgRestoMenu">
+  <div class="hd"><button class="bk" onclick="show('restoPro')">&#8592;</button><h1>Menu</h1></div>
+  <div id="menuProList"></div>
+  <div class="card mt">
+    <div class="fw" style="margin-bottom:8px">Ajouter plat</div>
+    <input class="inp" id="nmNom" placeholder="Nom" style="margin-top:0">
+    <input class="inp" id="nmPrix" type="number" placeholder="Prix">
+    <input class="inp" id="nmDesc" placeholder="Description">
+    <input class="inp" id="nmPhoto" placeholder="Photo URL">
+    <button class="btn btnG" onclick="addPlat()">+ Ajouter</button>
+  </div>
+</div>
+<div class="page" id="pgRestoLivraison">
+  <div class="hd"><button class="bk" onclick="show('restoPro')">&#8592;</button><h1>Livraison</h1></div>
+  <label class="lbl">Frais livraison</label><input class="inp" id="rlFrais" type="number">
+  <div class="sec"><h2>Quartiers desservis</h2></div>
+  <div id="restoZonesList"></div>
+  <button class="btn btnO btnSm mt" style="width:100%" onclick="show('addQuartier')">+ Ajouter quartier</button>
+  <button class="btn btnG" onclick="saveRestoLivraison()">Enregistrer</button>
+</div>
+
+<!-- HOTEL PRO -->
+<div class="page" id="pgHotelPro">
+  <div class="hd"><div><h1>Mon hotel</h1></div><div style="width:40px;height:40px;border-radius:50%;background:#009E60;display:flex;align-items:center;justify-content:center;font-weight:700;margin-left:auto">H</div></div>
+  <div id="hotelProContent"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+    <button class="btn btnG btnSm" style="width:100%" onclick="show('hotelInfo')">Infos</button>
+    <button class="btn btnY btnSm" style="width:100%" onclick="show('hotelChambres')">Chambres</button>
+    <button class="btn btnO btnSm" style="width:100%;grid-column:span 2" onclick="show('notifs')">Reservations</button>
+  </div>
+</div>
+<div class="page" id="pgHotelInfo">
+  <div class="hd"><button class="bk" onclick="show('hotelPro')">&#8592;</button><h1>Infos hotel</h1></div>
+  <label class="lbl">Nom</label><input class="inp" id="hiNom">
+  <div style="display:flex;gap:10px">
+    <div style="flex:1"><label class="lbl">Ville</label><input class="inp" id="hiVille"></div>
+    <div style="flex:1"><label class="lbl">Quartier</label><input class="inp" id="hiQuartier"></div>
+  </div>
+  <label class="lbl">Telephone (obligatoire)</label><input class="inp" id="hiTel" type="tel">
+  <label class="lbl">GPS</label><input class="inp" id="hiGps">
+  <button class="btn btnO btnSm mt" onclick="getGps('hiGps')">Ma position</button>
+  <label class="lbl">Photo URL</label><input class="inp" id="hiPhoto">
+  <label class="lbl">Description</label><textarea class="inp" id="hiDesc"></textarea>
+  <button class="btn btnG" onclick="saveHotelInfo()">Enregistrer</button>
+</div>
+<div class="page" id="pgHotelChambres">
+  <div class="hd"><button class="bk" onclick="show('hotelPro')">&#8592;</button><h1>Chambres</h1></div>
+  <div id="chambresList"></div>
+  <div class="card mt">
+    <div class="fw" style="margin-bottom:8px">Ajouter chambre</div>
+    <input class="inp" id="ncNom" placeholder="Type" style="margin-top:0">
+    <input class="inp" id="ncPrix" type="number" placeholder="Prix nuit">
+    <input class="inp" id="ncSem" type="number" placeholder="Prix semaine">
+    <input class="inp" id="ncMois" type="number" placeholder="Prix mois">
+    <input class="inp" id="ncCap" type="number" placeholder="Capacite">
+    <button class="btn btnG" onclick="addChambre()">+ Ajouter</button>
+  </div>
+</div>
+
+<!-- BUS PRO -->
+<div class="page" id="pgBusPro">
+  <div class="hd"><div><h1>Espace bus</h1></div><div style="width:40px;height:40px;border-radius:50%;background:#009E60;display:flex;align-items:center;justify-content:center;font-weight:700;margin-left:auto">B</div></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    <button class="btn btnG btnSm" style="width:100%" onclick="show('busInfo')">Vehicules</button>
+    <button class="btn btnY btnSm" style="width:100%" onclick="show('busTrajet')">Trajet</button>
+    <button class="btn btnO btnSm" style="width:100%;grid-column:span 2" onclick="show('notifs')">Reservations</button>
+  </div>
+  <div class="sec"><h2>Mes trajets publies</h2></div><div id="busProTrajets"></div>
+</div>
+<div class="page" id="pgBusInfo">
+  <div class="hd"><button class="bk" onclick="show('busPro')">&#8592;</button><h1>Vehicules</h1></div>
+  <div id="busList2"></div>
+  <div class="card mt">
+    <div class="fw" style="margin-bottom:8px">Ajouter vehicule</div>
+    <input class="inp" id="nbImm" placeholder="AB 1234 GA" style="margin-top:0">
+    <input class="inp" id="nbModele" placeholder="Modele">
+    <input class="inp" id="nbPlaces" type="number" placeholder="45">
+    <label class="lbl">Tel chauffeur (obligatoire)</label><input class="inp" id="nbTel" type="tel">
+    <label class="lbl">Climatise</label>
+    <select class="inp" id="nbClim"><option>Oui</option><option>Non</option></select>
+    <button class="btn btnG" onclick="addBus()">+ Ajouter</button>
+  </div>
+</div>
+<div class="page" id="pgBusTrajet">
+  <div class="hd"><button class="bk" onclick="show('busPro')">&#8592;</button><h1>Publier trajet</h1></div>
+  <div style="display:flex;gap:10px">
+    <div style="flex:1"><label class="lbl">Depart</label><input class="inp" id="btFrom"></div>
+    <div style="flex:1"><label class="lbl">Arrivee</label><input class="inp" id="btTo"></div>
+  </div>
+  <div style="display:flex;gap:10px">
+    <div style="flex:1"><label class="lbl">Heure</label><input class="inp" id="btHeure" type="time" value="08:00"></div>
+    <div style="flex:1"><label class="lbl">Duree (h)</label><input class="inp" id="btDuree" type="number"></div>
+  </div>
+  <label class="lbl">Prix</label><input class="inp" id="btPrix" type="number">
+  <label class="lbl">Bus</label><select class="inp" id="btBus"></select>
+  <label class="lbl">Embarquement</label><input class="inp" id="btEmbarq">
+  <button class="btn btnG" onclick="publierTrajet()">Publier</button>
+</div>
+
+<!-- TAXI PRO -->
+<div class="page" id="pgTaxiPro">
+  <div class="hd"><div><h1>Espace taxi</h1></div><div style="width:40px;height:40px;border-radius:50%;background:#009E60;display:flex;align-items:center;justify-content:center;font-weight:700;margin-left:auto">T</div></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    <button class="btn btnG btnSm" style="width:100%" onclick="show('taxiInfo')">Vehicule</button>
+    <button class="btn btnY btnSm" style="width:100%" onclick="show('taxiTarifs')">Tarifs</button>
+    <button class="btn btnO btnSm" style="width:100%;grid-column:span 2" onclick="show('notifs')">Courses</button>
+  </div>
+  <div id="taxiProContent" class="mt"></div>
+</div>
+<div class="page" id="pgTaxiInfo">
+  <div class="hd"><button class="bk" onclick="show('taxiPro')">&#8592;</button><h1>Mon vehicule</h1></div>
+  <label class="lbl">Immatriculation</label><input class="inp" id="tiImm">
+  <label class="lbl">Modele</label><input class="inp" id="tiModele">
+  <label class="lbl">Ville</label><input class="inp" id="tiVille">
+  <label class="lbl">Telephone (obligatoire)</label><input class="inp" id="tiTel" type="tel">
+  <label class="lbl">Zones</label><input class="inp" id="tiZones">
+  <button class="btn btnG" onclick="saveTaxiInfo()">Enregistrer</button>
+</div>
+<div class="page" id="pgTaxiTarifs">
+  <div class="hd"><button class="bk" onclick="show('taxiPro')">&#8592;</button><h1>Tarifs</h1></div>
+  <label class="lbl">Base</label><input class="inp" id="ttBase" type="number">
+  <label class="lbl">Par km</label><input class="inp" id="ttKm" type="number">
+  <label class="lbl">Nuit</label><input class="inp" id="ttNuit" type="number">
+  <button class="btn btnG" onclick="saveTaxiTarifs()">Enregistrer</button>
+</div>
+
+<!-- ETAB PRO (magasin, salon, snack, boite) -->
+<div class="page" id="pgEtabPro">
+  <div class="hd"><div><h1 id="etabTitle">Mon etablissement</h1></div><div style="width:40px;height:40px;border-radius:50%;background:#009E60;display:flex;align-items:center;justify-content:center;font-weight:700;margin-left:auto" id="etabAvatar">E</div></div>
+  <div id="etabProContent"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+    <button class="btn btnG btnSm" style="width:100%" onclick="show('etabInfo')">Infos</button>
+    <button class="btn btnY btnSm" style="width:100%" onclick="show('etabArticles')">Articles</button>
+    <button class="btn btnO btnSm" style="width:100%;grid-column:span 2" onclick="show('notifs')">Commandes</button>
+  </div>
+  <div class="sec"><h2>Commandes recues</h2></div>
+  <div id="etabOrders"></div>
+</div>
+<div class="page" id="pgEtabInfo">
+  <div class="hd"><button class="bk" onclick="show('etabPro')">&#8592;</button><h1>Infos etablissement</h1></div>
+  <label class="lbl">Nom</label><input class="inp" id="eiNom">
+  <div style="display:flex;gap:10px">
+    <div style="flex:1"><label class="lbl">Ville</label><input class="inp" id="eiVille"></div>
+    <div style="flex:1"><label class="lbl">Quartier</label><input class="inp" id="eiQuartier"></div>
+  </div>
+  <label class="lbl">Description</label><textarea class="inp" id="eiDesc"></textarea>
+  <label class="lbl">Telephone (obligatoire)</label><input class="inp" id="eiTel" type="tel">
+  <label class="lbl">GPS</label><input class="inp" id="eiGps">
+  <button class="btn btnO btnSm mt" onclick="getGps('eiGps')">Ma position</button>
+  <label class="lbl">Photo URL</label><input class="inp" id="eiPhoto">
+  <button class="btn btnG" onclick="saveEtabInfo()">Enregistrer</button>
+</div>
+<div class="page" id="pgEtabArticles">
+  <div class="hd"><button class="bk" onclick="show('etabPro')">&#8592;</button><h1 id="etabArtTitle">Mes articles</h1></div>
+  <div id="etabArtList"></div>
+  <div class="card mt">
+    <div class="fw" style="margin-bottom:8px">Ajouter article ou service</div>
+    <input class="inp" id="eaNom" placeholder="Nom" style="margin-top:0">
+    <input class="inp" id="eaPrix" type="number" placeholder="Prix">
+    <input class="inp" id="eaDesc" placeholder="Description">
+    <input class="inp" id="eaPhoto" placeholder="Photo URL">
+    <button class="btn btnG" onclick="addEtabArticle()">+ Ajouter</button>
+  </div>
+</div>
+
+<!-- MOYENS PAIEMENT -->
+<div class="page" id="pgMoyensPaiement">
+  <div class="hd"><button class="bk" onclick="show('profil')">&#8592;</button><div><h1>Mes moyens de reception</h1><p class="sub">Comment vos clients vous paient</p></div></div>
+  <div id="moyensList"></div>
+  <div class="card mt">
+    <div class="fw" style="margin-bottom:8px">Ajouter un moyen de reception</div>
+    <label class="lbl">Type</label>
+    <select class="inp" id="mpType">
+      <option>Airtel Money</option>
+      <option>Moov Money</option>
+      <option>Compte bancaire</option>
+      <option>PayPal</option>
+      <option>Especes</option>
+      <option>Mobile Money autre</option>
+    </select>
+    <label class="lbl">Numero ou IBAN</label>
+    <input class="inp" id="mpNumero" placeholder="Ex : +241 074000000">
+    <label class="lbl">Nom du titulaire</label>
+    <input class="inp" id="mpTitulaire">
+    <label class="lbl">Note (optionnel)</label>
+    <input class="inp" id="mpNote" placeholder="Ex : Envoyer capture apres paiement">
+    <label class="lbl" style="display:flex;align-items:center;gap:8px;text-transform:none;font-size:13px">
+      <input type="checkbox" id="mpDefault" style="width:auto;margin:0">
+      Definir comme moyen par defaut
+    </label>
+    <button class="btn btnG" onclick="addMoyen()">+ Ajouter ce moyen</button>
+  </div>
+</div>
+
+<!-- MESSAGES -->
+<div class="page" id="pgMessages">
+  <div class="hd"><h1>Messagerie</h1></div>
+  <div id="convList"></div>
+</div>
+<div class="page" id="pgChat">
+  <div class="hd"><button class="bk" onclick="show('messages')">&#8592;</button><h1 id="chatTitle">Chat</h1></div>
+  <div id="chatBox" style="background:#111827;border-radius:14px;padding:14px;height:52vh;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:12px"></div>
+  <div style="display:flex;gap:8px">
+    <input class="inp" id="chatInput" placeholder="Ecrire..." style="margin:0;flex:1">
+    <button class="btn btnG" style="width:50px;padding:0;margin:0;border-radius:50%" onclick="envoyerMessage()">></button>
+  </div>
+</div>
+
+<!-- PROFIL -->
+<div class="page" id="pgProfil">
+  <div style="text-align:center;padding:14px 0">
+    <div style="width:96px;height:96px;border-radius:50%;background:linear-gradient(135deg,#003DA5,#009E60);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:34px;margin:0 auto;border:3px solid #FCD116;overflow:hidden" id="profAvatar">U</div>
+    <h1 style="margin-top:14px;font-size:20px" id="profName">Utilisateur</h1>
+    <p class="sub" id="profTel"></p>
+    <p style="color:#34D399;font-size:13px;margin-top:5px" id="profCity">Libreville</p>
+    <div style="margin-top:8px"><span class="bdg bgG" id="roleBadge">Client</span></div>
+  </div>
+  <div class="card" style="cursor:pointer" onclick="show('profilEdit')"><div class="fw">Modifier mes informations</div><div class="cs">Nom, photo, telephone, ville</div></div>
+  <div class="card" style="cursor:pointer" onclick="show('moyensPaiement')"><div class="fw">Mes moyens de reception</div><div class="cs">Airtel, Moov, Banque, PayPal</div></div>
+  <div class="card" style="cursor:pointer" onclick="show('factures')"><div class="fw">Mes factures</div></div>
+  <div class="card" style="cursor:pointer" onclick="show('notifs')"><div class="fw">Mes notifications</div></div>
+  <div class="card" style="cursor:pointer" onclick="show('map')"><div class="fw">Carte du monde</div></div>
+  <div class="card" style="cursor:pointer" onclick="switchRole()"><div class="fw">Changer de role</div></div>
+  <div class="card" style="cursor:pointer" onclick="logout()"><div class="fw" style="color:#F87171">Se deconnecter</div></div>
+  <div class="foot">NeylaConnect 241<br>Concepteur : <b>Damien (Starly Koumba)</b></div>
+</div>
+<div class="page" id="pgProfilEdit">
+  <div class="hd"><button class="bk" onclick="show('profil')">&#8592;</button><h1>Mes infos</h1></div>
+  <label class="lbl">Nom complet</label>
+  <input class="inp" id="peNom">
+  <label class="lbl">Photo de profil</label>
+  <input class="inp" id="pePhoto" placeholder="URL ou bouton ci-dessous">
+  <button class="btn btnO btnSm mt" onclick="uploadPhoto()">Choisir dans mes photos</button>
+  <div style="text-align:center;margin-top:12px">
+    <img id="pePhotoPreview" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid #FCD116;background:#111827" src="https://i.pravatar.cc/150?u=1">
+  </div>
+  <label class="lbl">Telephone (obligatoire)</label>
+  <input class="inp" id="peTel" type="tel" placeholder="+241 ...">
+  <div style="display:flex;gap:10px">
+    <div style="flex:1"><label class="lbl">Ville</label><input class="inp" id="peVille"></div>
+    <div style="flex:1"><label class="lbl">Quartier</label><input class="inp" id="peQuartier"></div>
+  </div>
+  <label class="lbl">Email</label><input class="inp" id="peEmail" type="email">
+  <button class="btn btnG" onclick="saveProfil()">Enregistrer</button>
+</div>
+
+<div class="nav off" id="navbar"></div>
+<div class="toast" id="toast"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+var role='client';
+var online=false;
+var map=null,trackMap=null,markerLayer=null,quartierLayer=null,tileLayer=null;
+var gpsMarker=null,gpsWatch=null,gpsActive=false;
+var liveMarker=null,liveTimer=null,liveActive=false;
+var liveStart=[0.4162,9.4673],liveEnd=[0.45,9.51],liveProg=0;
+var curResto=null,curHotel=null,curTrajet=null,curChat=null,curEtabType='magasin';
+var selSeats=[];
+var curPay='Airtel Money';
+var otpMode='sms';
+var heroI=0;
+var searchT=null;
+
+var VILLES=[
+  {nom:'Libreville',lat:0.4162,lng:9.4673,m:1},
+  {nom:'Owendo',lat:0.285,lng:9.5},{nom:'Akanda',lat:0.5833,lng:9.3333},
+  {nom:'Ntoum',lat:0.3833,lng:9.7667},{nom:'Bikele',lat:0.4333,lng:9.6167},
+  {nom:'Kango',lat:0.15,lng:10.1167},{nom:'Cocobeach',lat:1,lng:9.5833},
+  {nom:'Port-Gentil',lat:-0.7193,lng:8.7815,m:1},
+  {nom:'Omboue',lat:-1.575,lng:9.2625},{nom:'Gamba',lat:-2.65,lng:10.05},
+  {nom:'Franceville',lat:-1.6333,lng:13.5833,m:1},
+  {nom:'Moanda',lat:-1.5667,lng:13.2},{nom:'Mounana',lat:-1.4333,lng:13.1667},
+  {nom:'Oyem',lat:1.5993,lng:11.5793,m:1},
+  {nom:'Bitam',lat:2.0833,lng:11.4833},{nom:'Mitzic',lat:0.7833,lng:11.55},
+  {nom:'Lambarene',lat:-0.7,lng:10.2333,m:1},
+  {nom:'Ndjole',lat:-0.1833,lng:10.7667},
+  {nom:'Mouila',lat:-1.8667,lng:11.05,m:1},
+  {nom:'Lebamba',lat:-2.2167,lng:11.4667},{nom:'Mbigou',lat:-1.9,lng:11.9333},
+  {nom:'Ndende',lat:-2.4,lng:11.3667},
+  {nom:'Tchibanga',lat:-2.9333,lng:10.9833,m:1},
+  {nom:'Mayumba',lat:-3.4167,lng:10.65},
+  {nom:'Koulamoutou',lat:-1.1333,lng:12.4667,m:1},
+  {nom:'Lastoursville',lat:-0.8167,lng:12.7},
+  {nom:'Makokou',lat:0.5667,lng:12.8667,m:1},{nom:'Booue',lat:-0.1,lng:11.9333}
+];
+
+var IMGS={
+  resto:['https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600','https://images.unsplash.com/photo-1552566626-52f8b828add9?w=600'],
+  hotel:['https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600','https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600'],
+  bus:['https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600','https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=600'],
+  taxi:['https://images.unsplash.com/photo-1502877338535-766e1452684a?w=600'],
+  plats:['https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=400','https://images.unsplash.com/photo-1553413077-190dd305871c?w=400'],
+  etab:['https://images.unsplash.com/photo-1552566626-52f8b828add9?w=600','https://images.unsplash.com/photo-1566419379933-5a36a2b1f0b6?w=600']
+};
+
+var TILES={
+  d2:{url:'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',attr:'OSM',max:19},
+  d3:{url:'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',attr:'OSM',max:19},
+  d4:{url:'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',attr:'OSM',max:19},
+  satellite:{url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',attr:'Esri',max:19},
+  hybrid:{url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',attr:'Esri',max:19},
+  terrain:{url:'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',attr:'OTM',max:17}
+};
+
+function save(k,v){try{localStorage.setItem('n241_'+k,JSON.stringify(v))}catch(e){}}
+function load(k,d){try{var v=localStorage.getItem('n241_'+k);return v?JSON.parse(v):d}catch(e){return d}}
+
+var state={
+  quartiers:load('q',[]),
+  restos:load('r',[]),
+  hotels:load('h',[]),
+  trajets:load('t',[]),
+  bus:load('b',[]),
+  colis:load('c',[]),
+  commandes:load('o',[]),
+  billets:load('bi',[]),
+  factures:load('f',[]),
+  notifs:load('n',[]),
+  moyens:load('moyens',[]),
+  etabs:load('etabs',[]),
+  panier:[],
+  profil:load('p',{nom:'Utilisateur',tel:'',ville:'Libreville',quartier:'',email:'',photo:''}),
+  mesZones:load('mz',[]),
+  mesTarifs:load('mt',{}),
+  restoPro:load('rp',null),
+  hotelPro:load('hp',null),
+  taxiInfo:load('ti',null),
+  taxiTarifs:load('tt',{base:1500,km:500,nuit:2500}),
+  chats:load('ch',{}),
+  livGains:load('lg',0),
+  livCourses:load('lc',0)
+};
+
+var TABS={
+  client:[['home','Accueil','H'],['map','Carte','C'],['factures','Factures','F'],['messages','Messages','M'],['profil','Profil','P']],
+  resto:[['restoPro','Resto','R'],['notifs','Alertes','A'],['map','Carte','C'],['messages','Messages','M'],['profil','Profil','P']],
+  hotel:[['hotelPro','Hotel','H'],['notifs','Alertes','A'],['map','Carte','C'],['messages','Messages','M'],['profil','Profil','P']],
+  livreur:[['livreur','Courses','C'],['notifs','Alertes','A'],['map','Carte','C'],['messages','Messages','M'],['profil','Profil','P']],
+  bus:[['busPro','Bus','B'],['notifs','Alertes','A'],['map','Carte','C'],['messages','Messages','M'],['profil','Profil','P']],
+  taxi:[['taxiPro','Taxi','T'],['notifs','Alertes','A'],['map','Carte','C'],['messages','Messages','M'],['profil','Profil','P']],
+  magasin:[['etabPro','Magasin','M'],['notifs','Alertes','A'],['map','Carte','C'],['messages','Messages','M'],['profil','Profil','P']],
+  salon:[['etabPro','Salon','S'],['notifs','Alertes','A'],['map','Carte','C'],['messages','Messages','M'],['profil','Profil','P']],
+  snack:[['etabPro','Snack','K'],['notifs','Alertes','A'],['map','Carte','C'],['messages','Messages','M'],['profil','Profil','P']],
+  boite:[['etabPro','Boite','N'],['notifs','Alertes','A'],['map','Carte','C'],['messages','Messages','M'],['profil','Profil','P']]
+};
+var TABS_PAGES=['home','map','tracking','messages','profil','restoPro','hotelPro','livreur','busPro','taxiPro','etabPro','notifs','factures'];
+
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1)}
+
+function show(page){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on')});
+  var el=document.getElementById('pg'+cap(page));
+  if(el)el.classList.add('on');
+  var nb=document.getElementById('navbar');
+  var isTab=TABS_PAGES.indexOf(page)>=0;
+  if(isTab){renderNavbar(page);nb.classList.remove('off');}else nb.classList.add('off');
+  window.scrollTo(0,0);
+  if(page==='resto')renderRestos();
+  if(page==='hotel')renderHotels();
+  if(page==='bus')renderBus();
+  if(page==='panier')renderPanier();
+  if(page==='profil')renderProfil();
+  if(page==='profilEdit')fillProfilEdit();
+  if(page==='livreur')renderLivreur();
+  if(page==='livreurZone')renderZones();
+  if(page==='livreurTarifs')renderTarifs();
+  if(page==='restoPro')renderRestoPro();
+  if(page==='restoMenu')renderMenuPro();
+  if(page==='restoLivraison')renderRestoLivraison();
+  if(page==='hotelPro')renderHotelPro();
+  if(page==='hotelChambres')renderChambres();
+  if(page==='busPro')renderBusPro();
+  if(page==='busInfo')renderBusList2();
+  if(page==='busTrajet')fillBusForm();
+  if(page==='taxiPro')renderTaxiPro();
+  if(page==='etabPro')renderEtabPro();
+  if(page==='etabInfo')renderEtabInfoForm();
+  if(page==='etabArticles')renderEtabArticles();
+  if(page==='messages')renderConvs();
+  if(page==='notifs')renderNotifs();
+  if(page==='factures')renderFactures();
+  if(page==='moyensPaiement')renderMoyens();
+  if(page==='colis')fillQ('colQuartier');
+  if(page==='panier')fillQ('pQuartier');
+  if(page==='taxi')fillQ('taxiFrom');
+  if(page==='map')setTimeout(initMap,200);
+  if(page==='tracking')setTimeout(initTrack,200);
+}
+
+function renderNavbar(active){
+  var tabs=TABS[role]||TABS.client;
+  var count=state.panier.reduce(function(s,i){return s+i.qte},0);
+  var nc=state.notifs.filter(function(n){return !n.read}).length;
+  var h='';
+  tabs.forEach(function(t){
+    var dot='';
+    if(t[0]==='home'&&count>0)dot='<span class="bd2">'+count+'</span>';
+    if(t[0]==='notifs'&&nc>0)dot='<span class="bd2">'+nc+'</span>';
+    h+='<button class="'+(active===t[0]?'act':'')+'" onclick="show(\''+t[0]+'\')"><span class="ic">'+t[2]+'</span>'+t[1]+dot+'</button>';
+  });
+  document.getElementById('navbar').innerHTML=h;
+}
+
+function pickRole(el,r){
+  role=r;
+  document.querySelectorAll('.role').forEach(function(c){c.classList.remove('sel')});
+  el.classList.add('sel');
+  var lb={client:'Client',resto:'Restaurant',hotel:'Hotel',livreur:'Livreur',bus:'Chauffeur Bus',taxi:'Chauffeur Taxi',magasin:'Magasin',salon:'Salon de coiffure',snack:'Snack bar',boite:'Boite de nuit'};
+  var b=document.getElementById('roleBadge');
+  if(b)b.textContent=lb[r];
+}
+
+function sendCode(){
+  var p=document.getElementById('phone').value||'+241 01 23 45 67';
+  otpMode='sms';
+  document.getElementById('otpInfo').textContent='Code SMS envoye a '+p;
+  show('otp');
+}
+function sendEmailCode(){
+  var e=document.getElementById('emailInput').value.trim();
+  if(!e||!e.includes('@')){toast('Email invalide',true);return;}
+  otpMode='email';
+  document.getElementById('otpInfo').textContent='Code email envoye a '+e;
+  show('otp');
+}
+function otpChange(v){
+  var c=v.replace(/\D/g,'').slice(0,6);
+  document.getElementById('otpIn').value=c;
+  document.querySelectorAll('.otpB').forEach(function(b,i){b.textContent=c[i]||'';b.classList.toggle('on',!!c[i]);});
+}
+function verify(){
+  if(document.getElementById('otpIn').value==='123456'){
+    var h={client:'home',resto:'restoPro',hotel:'hotelPro',livreur:'livreur',bus:'busPro',taxi:'taxiPro',magasin:'etabPro',salon:'etabPro',snack:'etabPro',boite:'etabPro'};
+    if(role==='magasin'||role==='salon'||role==='snack'||role==='boite'){
+      showEtabPro(role);
+    } else {
+      show(h[role]||'home');
+    }
+    toast(otpMode==='email'?'Email verifie':'Bienvenue sur NeylaConnect 241');
+  }else toast('Code incorrect, tape 123456',true);
+}
+function social(p){
+  var h={client:'home',resto:'restoPro',hotel:'hotelPro',livreur:'livreur',bus:'busPro',taxi:'taxiPro',magasin:'etabPro',salon:'etabPro',snack:'etabPro',boite:'etabPro'};
+  if(role==='magasin'||role==='salon'||role==='snack'||role==='boite'){
+    showEtabPro(role);
+  } else {
+    show(h[role]||'home');
+  }
+  toast('Connexion '+p+' reussie');
+}
+function logout(){show('login');toast('Deconnecte');}
+
+function renderProfil(){
+  document.getElementById('profName').textContent=state.profil.nom;
+  document.getElementById('profTel').textContent=state.profil.tel||'Ajoutez votre numero';
+  document.getElementById('profCity').textContent=state.profil.ville;
+  var av=document.getElementById('profAvatar');
+  if(state.profil.photo){
+    av.innerHTML='<img src="'+state.profil.photo+'" style="width:100%;height:100%;border-radius:50%;object-fit:cover">';
+  }else{
+    av.textContent=state.profil.nom.charAt(0).toUpperCase();
+  }
+  document.getElementById('hName').textContent=state.profil.nom.split(' ')[0];
+  document.getElementById('hCity').textContent=state.profil.ville+', Gabon';
+  var hv=document.getElementById('hAvatar');
+  if(state.profil.photo){
+    hv.innerHTML='<img src="'+state.profil.photo+'" style="width:100%;height:100%;border-radius:50%;object-fit:cover">';
+  }else{
+    hv.textContent=state.profil.nom.charAt(0).toUpperCase();
+  }
+}
+function fillProfilEdit(){
+  document.getElementById('peNom').value=state.profil.nom;
+  document.getElementById('peTel').value=state.profil.tel||'';
+  document.getElementById('peVille').value=state.profil.ville;
+  document.getElementById('peQuartier').value=state.profil.quartier||'';
+  document.getElementById('peEmail').value=state.profil.email||'';
+  document.getElementById('pePhoto').value=state.profil.photo||'';
+  if(state.profil.photo)document.getElementById('pePhotoPreview').src=state.profil.photo;
+}
+function saveProfil(){
+  var n=document.getElementById('peNom').value.trim();
+  if(!n){toast('Nom obligatoire',true);return;}
+  state.profil.nom=n;
+  state.profil.tel=document.getElementById('peTel').value.trim()||state.profil.tel;
+  state.profil.ville=document.getElementById('peVille').value.trim()||state.profil.ville;
+  state.profil.quartier=document.getElementById('peQuartier').value.trim();
+  state.profil.email=document.getElementById('peEmail').value.trim();
+  var ph=document.getElementById('pePhoto').value.trim();
+  if(ph)state.profil.photo=ph;
+  save('p',state.profil);
+  toast('Profil enregistre');
+  setTimeout(function(){show('profil')},600);
+}
+function uploadPhoto(){
+  var inp=document.createElement('input');
+  inp.type='file';
+  inp.accept='image/*';
+  inp.onchange=function(e){
+    var file=e.target.files[0];
+    if(!file)return;
+    var reader=new FileReader();
+    reader.onload=function(ev){
+      document.getElementById('pePhoto').value=ev.target.result;
+      document.getElementById('pePhotoPreview').src=ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+  inp.click();
+}
+
+function fillQ(id){
+  var s=document.getElementById(id);if(!s)return;
+  var h='<option value="">Choisir</option>';
+  state.quartiers.forEach(function(q){h+='<option value="'+q.nom+' '+q.ville+'">'+q.nom+' '+q.ville+'</option>'});
+  s.innerHTML=h;
+}
+function ajouterQuartier(){
+  var nom=document.getElementById('qNom').value.trim();
+  var ville=document.getElementById('qVille').value.trim();
+  var prov=document.getElementById('qProvince').value;
+  var gps=document.getElementById('qGps').value.trim();
+  if(!nom||!ville){toast('Nom et ville obligatoires',true);return;}
+  var ex=state.quartiers.some(function(q){return q.nom.toLowerCase()===nom.toLowerCase()&&q.ville.toLowerCase()===ville.toLowerCase()});
+  if(ex){toast('Existe deja',true);return;}
+  var co=null;
+  if(gps){var p=gps.split(',');if(p.length===2)co={lat:parseFloat(p[0]),lng:parseFloat(p[1])};}
+  if(!co){
+    var v=VILLES.find(function(x){return x.nom.toLowerCase()===ville.toLowerCase()});
+    if(v)co={lat:v.lat+(Math.random()-0.5)*0.06,lng:v.lng+(Math.random()-0.5)*0.06};
+  }
+  state.quartiers.push({nom:nom,ville:ville,province:prov,lat:co?co.lat:null,lng:co?co.lng:null});
+  save('q',state.quartiers);
+  document.getElementById('qNom').value='';
+  toast(nom+' ajoute');
+  if(map)refreshMarkers();
+  setTimeout(function(){show('home')},700);
+}
+function getGps(id){
+  if(!navigator.geolocation){toast('GPS non dispo',true);return;}
+  toast('Recherche position');
+  navigator.geolocation.getCurrentPosition(
+    function(p){document.getElementById(id).value=p.coords.latitude.toFixed(5)+', '+p.coords.longitude.toFixed(5);toast('Position recuperee');},
+    function(){toast('GPS refuse',true);},
+    {enableHighAccuracy:true,timeout:10000}
+  );
+}
+
+function initMap(){
+  if(map){setTimeout(function(){map.invalidateSize()},200);return;}
+  map=L.map('mapArea',{center:[-0.8,11.5],zoom:6,preferCanvas:true});
+  applyTile('d2');
+  markerLayer=L.layerGroup().addTo(map);
+  quartierLayer=L.layerGroup().addTo(map);
+  var ct=[[1.15,9.35],[2.32,9.85],[2.35,11.5],[2.15,13],[1.7,14.5],[0.5,14.5],[-0.5,13.9],[-1.5,14.5],[-2.4,13.9],[-3,11.9],[-3.98,11.1],[-3.98,8.7],[-2.5,8.7],[-1,8.7],[0.6,9.3],[1.15,9.35]];
+  L.polygon(ct,{color:'#FCD116',weight:2,opacity:0.7,fillColor:'#009E60',fillOpacity:0.06,dashArray:'8,6'}).addTo(map);
+  refreshMarkers();
+  setTimeout(function(){map.invalidateSize()},300);
+}
+function applyTile(mode){
+  if(tileLayer&&map)map.removeLayer(tileLayer);
+  if(!map)return;
+  var c=TILES[mode]||TILES.d2;
+  tileLayer=L.tileLayer(c.url,{maxZoom:c.max,attribution:c.attr});
+  tileLayer.addTo(map);
+}
+function setMode(mode,btn){
+  document.querySelectorAll('.modeBtn').forEach(function(b){b.classList.remove('act')});
+  if(btn)btn.classList.add('act');
+  var w=document.getElementById('mapArea');
+  applyTile(mode);
+  if(mode==='3d'){w.style.transform='rotateX(35deg) scale(1.3)';w.style.transformOrigin='center bottom';w.style.transition='transform 0.6s';}
+  else if(mode==='4d'){w.style.transform='rotateX(50deg) scale(1.5) rotateZ(-5deg)';w.style.transformOrigin='center bottom';w.style.transition='transform 0.6s';}
+  else {w.style.transform='none';}
+  var lb={d2:'Vue 2D',d3:'Vue 3D',d4:'Vue 4D',satellite:'Vue satellite',hybrid:'Vue hybride',terrain:'Vue terrain'};
+  toast(lb[mode]||mode);
+}
+function worldView(){if(!map)return;map.flyTo([20,0],2,{duration:2});toast('Vue mondiale');}
+function refreshMarkers(){
+  if(!markerLayer)return;
+  markerLayer.clearLayers();quartierLayer.clearLayers();
+  VILLES.forEach(function(v){
+    var ic=L.divIcon({className:'mark',html:'<div style="text-align:center"><div class="dot '+(v.m?'m':'')+'"></div><div class="lbl">'+v.nom+'</div></div>',iconSize:[80,42],iconAnchor:[40,10]});
+    var m=L.marker([v.lat,v.lng],{icon:ic}).addTo(markerLayer);
+    m.on('click',function(){showInfo({nom:v.nom,lat:v.lat,lng:v.lng,ville:v.nom,type:'ville'})});
+  });
+  state.quartiers.forEach(function(q){
+    if(q.lat==null||q.lng==null)return;
+    var ic=L.divIcon({className:'mark',html:'<div style="text-align:center"><div class="dot q"></div><div class="lbl">'+q.nom+'</div></div>',iconSize:[80,42],iconAnchor:[40,10]});
+    var m=L.marker([q.lat,q.lng],{icon:ic}).addTo(quartierLayer);
+    m.on('click',function(){showInfo({nom:q.nom,lat:q.lat,lng:q.lng,ville:q.ville,type:'quartier'})});
+  });
+}
+function showInfo(info){
+  var el=document.getElementById('mapInfo');
+  el.classList.remove('off');
+  el.innerHTML='<div class="ct">'+info.nom+'</div><div class="cs">'+(info.type==='quartier'?'Quartier de ':'Ville du Gabon ')+info.ville+'</div><div class="cs">'+info.lat.toFixed(4)+' N, '+info.lng.toFixed(4)+' E</div>';
+  map.flyTo([info.lat,info.lng],13,{duration:1.2});
+}
+function centerGabon(){if(!map)return;map.flyTo([-0.8,11.5],6,{duration:1.2});document.getElementById('mapInfo').classList.add('off');}
+function searchWorld(q){
+  q=q.trim();
+  var r=document.getElementById('searchRes');
+  if(q.length<3){r.classList.remove('on');return;}
+  clearTimeout(searchT);
+  searchT=setTimeout(function(){
+    fetch('https://nominatim.openstreetmap.org/search?format=json&q='+encodeURIComponent(q)+'&limit=8&addressdetails=1&accept-language=fr')
+      .then(function(res){return res.json()})
+      .then(function(data){
+        if(!data||!data.length){r.classList.remove('on');return;}
+        var h='';
+        data.forEach(function(d){
+          var c=d.address?d.address.country:'';
+          var n=(d.name||d.display_name.split(',')[0]).replace(/'/g,'');
+          h+='<div class="it" onclick="goPlace('+d.lat+','+d.lon+',\''+n+'\')"><div class="nm">'+n+'</div><div class="co">'+(c||d.display_name)+'</div></div>';
+        });
+        r.innerHTML=h;r.classList.add('on');
+      })
+      .catch(function(){r.classList.remove('on')});
+  },600);
+}
+function searchNow(){
+  var q=document.getElementById('mapSearch').value.trim();
+  if(q.length<2){toast('Entrez au moins 2 caracteres',true);return;}
+  toast('Recherche');
+  fetch('https://nominatim.openstreetmap.org/search?format=json&q='+encodeURIComponent(q)+'&limit=1&addressdetails=1&accept-language=fr')
+    .then(function(r){return r.json()})
+    .then(function(data){
+      if(!data||!data.length){toast('Aucun resultat',true);return;}
+      goPlace(data[0].lat,data[0].lon,data[0].display_name);
+    })
+    .catch(function(){toast('Erreur de recherche',true)});
+}
+function goPlace(lat,lng,name){
+  document.getElementById('searchRes').classList.remove('on');
+  if(!map)initMap();
+  setTimeout(function(){
+    map.flyTo([parseFloat(lat),parseFloat(lng)],13,{duration:2});
+    var el=document.getElementById('mapInfo');
+    el.classList.remove('off');
+    el.innerHTML='<div class="ct">'+name.split(',')[0]+'</div><div class="cs">'+name+'</div>';
+  },300);
+}
+function goToCity(lat,lng,nom){
+  show('map');
+  setTimeout(function(){
+    if(!map)initMap();
+    setTimeout(function(){
+      map.flyTo([lat,lng],11,{duration:1.5});
+      var el=document.getElementById('mapInfo');
+      el.classList.remove('off');
+      el.innerHTML='<div class="ct">'+nom+'</div><div class="cs">'+lat.toFixed(4)+' N, '+lng.toFixed(4)+' E</div>';
+    },400);
+  },300);
+}
+function toggleGps(){
+  if(gpsActive)return stopGps();
+  if(!navigator.geolocation){toast('GPS non dispo',true);return;}
+  toast('Activation GPS');
+  gpsActive=true;
+  document.getElementById('btnGps').classList.add('pri');
+  gpsWatch=navigator.geolocation.watchPosition(
+    function(p){
+      var lat=p.coords.latitude,lng=p.coords.longitude;
+      if(gpsMarker)map.removeLayer(gpsMarker);
+      var ic=L.divIcon({className:'gpsMark',html:'<div class="pin"></div>',iconSize:[20,20],iconAnchor:[10,10]});
+      gpsMarker=L.marker([lat,lng],{icon:ic}).addTo(map);
+      map.flyTo([lat,lng],15,{duration:0.8});
+      var el=document.getElementById('mapInfo');
+      el.classList.remove('off');
+      el.innerHTML='<div class="ct">Votre position GPS</div><div class="cs">'+lat.toFixed(5)+' N, '+lng.toFixed(5)+' E</div>';
+    },
+    function(){toast('GPS refuse',true);stopGps();},
+    {enableHighAccuracy:true,maximumAge:0,timeout:15000}
+  );
+}
+function stopGps(){
+  if(gpsWatch){navigator.geolocation.clearWatch(gpsWatch);gpsWatch=null;}
+  if(gpsMarker&&map){map.removeLayer(gpsMarker);gpsMarker=null;}
+  gpsActive=false;
+  document.getElementById('btnGps').classList.remove('pri');
+  toast('GPS desactive');
+}
+function toggleLive(){
+  if(liveActive)return stopLiveDemo();
+  liveActive=true;
+  document.getElementById('btnLive').classList.add('lv');
+  var s=liveStart,e=liveEnd,t=0;
+  var ic=L.divIcon({className:'lvMark',html:'<div class="core">S</div>',iconSize:[36,36],iconAnchor:[18,18]});
+  liveMarker=L.marker(s,{icon:ic}).addTo(map);
+  liveTimer=setInterval(function(){
+    t+=0.02;if(t>=1){t=1;clearInterval(liveTimer);}
+    var lat=s[0]+(e[0]-s[0])*t,lng=s[1]+(e[1]-s[1])*t;
+    liveMarker.setLatLng([lat,lng]);
+  },800);
+  toast('Demo live activee');
+}
+function stopLiveDemo(){
+  if(liveTimer)clearInterval(liveTimer);
+  if(liveMarker&&map)map.removeLayer(liveMarker);
+  liveMarker=null;liveActive=false;
+  var b=document.getElementById('btnLive');if(b)b.classList.remove('lv');
+}
+function initTrack(){
+  if(trackMap){setTimeout(function(){trackMap.invalidateSize()},200);return;}
+  trackMap=L.map('trackArea',{center:[0.4162,9.4673],zoom:13,zoomControl:false});
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'NeylaConnect'}).addTo(trackMap);
+  L.marker(liveStart,{icon:L.divIcon({className:'mark',html:'<div class="lbl">Restaurant</div>',iconSize:[80,28],iconAnchor:[40,14]})}).addTo(trackMap);
+  L.marker(liveEnd,{icon:L.divIcon({className:'mark',html:'<div class="lbl">Vous</div>',iconSize:[80,28],iconAnchor:[40,14]})}).addTo(trackMap);
+  L.polyline([liveStart,liveEnd],{color:'#FCD116',weight:3,dashArray:'10,8',opacity:0.7}).addTo(trackMap);
+  var ic=L.divIcon({className:'lvMark',html:'<div class="core">S</div>',iconSize:[36,36],iconAnchor:[18,18]});
+  liveMarker=L.marker(liveStart,{icon:ic}).addTo(trackMap);
+  liveProg=0;
+  if(liveTimer)clearInterval(liveTimer);
+  liveTimer=setInterval(tickTrack,800);
+  setTimeout(function(){trackMap.invalidateSize()},300);
+  setTimeout(function(){trackMap.fitBounds([liveStart,liveEnd],{padding:[60,60]})},500);
+}
+function tickTrack(){
+  liveProg+=0.02;
+  if(liveProg>=1){
+    liveProg=1;clearInterval(liveTimer);
+    document.getElementById('tlRoute').classList.add('dn');
+    document.getElementById('tlDone').classList.add('dn');
+    document.getElementById('liveBar').style.width='100%';
+    document.getElementById('liveEta').textContent='Arrive';
+    toast('Commande livree');return;
+  }
+  var lat=liveStart[0]+(liveEnd[0]-liveStart[0])*liveProg;
+  var lng=liveStart[1]+(liveEnd[1]-liveStart[1])*liveProg;
+  if(liveMarker)liveMarker.setLatLng([lat,lng]);
+  var pct=Math.round(liveProg*100);
+  document.getElementById('liveBar').style.width=pct+'%';
+  document.getElementById('liveEta').textContent='ETA '+Math.max(1,Math.round(15*(1-liveProg)))+' min';
+  document.getElementById('livePos').textContent=lat.toFixed(5)+' N, '+lng.toFixed(5)+' E - '+pct+'%';
+}
+function recenterTrack(){if(trackMap&&liveMarker)trackMap.flyTo(liveMarker.getLatLng(),14,{duration:1});}
+
+function pickPay(el,pay){
+  curPay=pay;
+  document.querySelectorAll('.payOpt').forEach(function(o){o.classList.remove('sel')});
+  el.classList.add('sel');
+}
+function addNotif(d){
+  var n={id:'n'+Date.now(),date:new Date().toLocaleString('fr-FR'),read:false};
+  for(var k in d)n[k]=d[k];
+  state.notifs.unshift(n);save('n',state.notifs);
+  toast('Notification envoyee au vendeur');
+}
+function addFacture(d){
+  var f={num:'FCT'+Math.floor(Math.random()*900000+100000),date:new Date().toLocaleString('fr-FR')};
+  for(var k in d)f[k]=d[k];
+  state.factures.unshift(f);save('f',state.factures);return f;
+}
+function renderFactures(){
+  var h='';
+  state.factures.forEach(function(f){
+    h+='<div class="card" style="cursor:pointer" onclick="openFacture(\''+f.num+'\')"><div class="row"><div class="ct">'+f.num+'</div><span class="bdg bgG">Paye</span></div><div class="cs">'+f.type+' - '+f.date+'</div><div class="cs">'+f.vendeur+'</div><div class="row mt"><span class="cs">'+f.moyen+'</span><span class="prc">'+f.total.toLocaleString()+' F</span></div></div>';
+  });
+  if(!h)h='<div class="emp"><span class="ic">F</span><div class="tt">Aucune facture</div></div>';
+  document.getElementById('facturesList').innerHTML=h;
+}
+function openFacture(num){
+  var f=state.factures.find(function(x){return x.num===num});if(!f)return;
+  document.getElementById('factureContent').innerHTML='<div style="text-align:center;padding:12px 0;border-bottom:1px solid #1E293B;margin-bottom:12px"><div class="flagbar" style="margin:0 auto 10px"><span class="fg"></span><span class="fy"></span><span class="fb"></span></div><h2>NeylaConnect 241</h2><div class="cs">Facture '+f.num+'</div><div class="cs">'+f.date+'</div></div><div class="row"><span class="cs">Type</span><span class="fw">'+f.type+'</span></div><div class="row mt"><span class="cs">Vendeur</span><span class="fw">'+f.vendeur+'</span></div><div class="row mt"><span class="cs">Client</span><span class="fw">'+f.client+'</span></div><div class="row mt"><span class="cs">Tel</span><span class="fw">'+f.tel+'</span></div><div class="row mt"><span class="cs">Paiement</span><span class="fw">'+f.moyen+'</span></div><div style="border-top:1px solid #1E293B;margin:14px 0;padding-top:10px">'+f.details+'</div><div class="row mt"><span class="fw" style="font-size:15px">TOTAL</span><span class="prc prcL">'+f.total.toLocaleString()+' F</span></div><div class="cs" style="text-align:center;margin-top:16px">NeylaConnect 241<br>Damien (Starly Koumba)</div>';
+  show('factureDetail');
+}
+function renderNotifs(){
+  var h='';
+  state.notifs.forEach(function(n){
+    h+='<div class="notifCard"><div class="row"><div class="fw">'+n.title+'</div>'+(n.read?'':'<span class="bdg bgR">NEW</span>')+'</div><div class="cs">'+n.date+'</div><div class="cs">'+n.message+'</div>'+(n.tel?'<div class="cs">Tel : '+n.tel+'</div>':'')+'<div style="display:flex;gap:8px;margin-top:10px">'+(n.tel?'<button class="btn btnG btnSm" onclick="window.location.href=\'tel:'+n.tel+'\'">Appeler</button>':'')+'<button class="btn btnO btnSm" onclick="markRead(\''+n.id+'\')">Marquer lu</button></div></div>';
+  });
+  if(!h)h='<div class="emp"><span class="ic">A</span><div class="tt">Aucune notification</div></div>';
+  document.getElementById('notifsList').innerHTML=h;
+}
+function markRead(id){
+  var n=state.notifs.find(function(x){return x.id===id});
+  if(n){n.read=true;save('n',state.notifs);renderNotifs();}
+}
+
+function renderMoyens(){
+  var list=state.moyens||[];
+  var h='';
+  if(!list.length){
+    h='<div class="emp"><span class="ic">$</span><div class="tt">Aucun moyen configure</div>Ajoutez comment vous voulez recevoir votre argent</div>';
+  } else {
+    list.forEach(function(m,i){
+      h+='<div class="moyenCard"><div class="row"><div style="flex:1"><div class="fw">'+m.type+'</div><div class="cs">'+m.numero+'</div><div class="cs">Titulaire : '+m.titulaire+'</div>'+(m.note?'<div class="cs">Note : '+m.note+'</div>':'')+'</div><div style="text-align:right">'+(m.defaut?'<span class="badgeDef">DEFAUT</span>':'')+'<br><button class="btn btnO btnSm mt" onclick="delMoyen('+i+')">X</button></div></div></div>';
+    });
+  }
+  document.getElementById('moyensList').innerHTML=h;
+}
+function addMoyen(){
+  var type=document.getElementById('mpType').value;
+  var numero=document.getElementById('mpNumero').value.trim();
+  var titulaire=document.getElementById('mpTitulaire').value.trim();
+  var note=document.getElementById('mpNote').value.trim();
+  var defaut=document.getElementById('mpDefault').checked;
+  if(!numero||!titulaire){toast('Numero et titulaire obligatoires',true);return;}
+  if(!state.moyens)state.moyens=[];
+  if(defaut)state.moyens.forEach(function(m){m.defaut=false});
+  state.moyens.push({type:type,numero:numero,titulaire:titulaire,note:note,defaut:defaut});
+  save('moyens',state.moyens);
+  document.getElementById('mpNumero').value='';
+  document.getElementById('mpTitulaire').value='';
+  document.getElementById('mpNote').value='';
+  document.getElementById('mpDefault').checked=false;
+  toast('Moyen ajoute');
+  renderMoyens();
+}
+function delMoyen(i){
+  if(!state.moyens)return;
+  state.moyens.splice(i,1);save('moyens',state.moyens);renderMoyens();toast('Moyen supprime');
+}
+function getMoyenDefaut(){
+  if(!state.moyens||!state.moyens.length)return null;
+  var d=state.moyens.find(function(m){return m.defaut});
+  return d||state.moyens[0];
+}
+
+function renderRestos(){
+  var h='';
+  state.restos.forEach(function(r,i){
+    var img=r.photo||IMGS.resto[i%IMGS.resto.length];
+    h+='<div class="imgCard" onclick="openResto(\''+r.id+'\')"><div class="im" style="background-image:url(\''+img+'\')"></div><div class="bd"><div class="tt">'+r.nom+'</div><div class="mt2">'+r.ville+' - '+(r.cuisine||'')+'</div><div class="mt2">'+(r.menu||[]).length+' plats - Livraison '+(r.frais||0)+' F</div></div></div>';
+  });
+  if(!h)h='<div class="emp"><span class="ic">R</span><div class="tt">Aucun restaurant</div></div>';
+  document.getElementById('restoList').innerHTML=h;
+}
+function openResto(id){
+  curResto=state.restos.find(function(r){return r.id===id});if(!curResto)return;
+  var r=curResto;
+  document.getElementById('rdName').textContent=r.nom;
+  document.getElementById('rdInfo').textContent=(r.quartier||'')+', '+(r.ville||'')+' - '+(r.cuisine||'');
+  document.getElementById('rdCall').innerHTML=r.tel?'<div class="callBanner"><div style="font-size:13px;font-weight:700;margin-bottom:6px">Contact direct</div><div class="cs" style="color:rgba(255,255,255,0.85)">'+r.tel+'</div><button class="btn btnY mt" onclick="window.location.href=\'tel:'+r.tel+'\'">Appeler</button></div>':'';
+  var h='';
+  (r.menu||[]).forEach(function(m,i){
+    var img=m.photo||IMGS.plats[i%IMGS.plats.length];
+    h+='<div class="imgCard" style="cursor:default"><div class="im" style="background-image:url(\''+img+'\');height:110px"></div><div class="bd"><div class="row"><div style="flex:1"><div class="fw">'+m.nom+'</div>'+(m.desc?'<div class="cs">'+m.desc+'</div>':'')+'<div class="prc mt">'+m.prix.toLocaleString()+' F</div></div><button class="btn btnG btnSm" onclick="addPanier(\''+m.nom.replace(/'/g,'')+'\','+m.prix+')">+</button></div></div></div>';
+  });
+  if(!h)h='<div class="emp"><span class="ic">M</span>Aucun plat</div>';
+  document.getElementById('rdMenu').innerHTML=h;
+  document.getElementById('cartCount').textContent=state.panier.reduce(function(s,i){return s+i.qte},0);
+  document.getElementById('pTelClient').value=state.profil.tel||'';
+  show('restoDetail');
+}
+function addPanier(nom,prix){
+  var f=state.panier.find(function(p){return p.nom===nom});
+  if(f)f.qte++;else state.panier.push({nom:nom,prix:prix,qte:1});
+  document.getElementById('cartCount').textContent=state.panier.reduce(function(s,i){return s+i.qte},0);
+  toast(nom+' ajoute');
+}
+function renderPanier(){
+  fillQ('pQuartier');
+  var h='',s=0;
+  state.panier.forEach(function(p,i){
+    var st=p.prix*p.qte;s+=st;
+    h+='<div class="card"><div class="row"><div><div class="fw">'+p.nom+'</div><div class="cs">'+p.prix.toLocaleString()+' F x '+p.qte+'</div></div><div style="text-align:right"><div class="prc">'+st.toLocaleString()+' F</div><button class="btn btnO btnSm mt" onclick="delPanier('+i+')">Retirer</button></div></div></div>';
+  });
+  if(!h)h='<div class="emp"><span class="ic">P</span>Panier vide</div>';
+  var f=curResto?(curResto.frais||0):0;
+  document.getElementById('panierList').innerHTML=h;
+  document.getElementById('pSous').textContent=s.toLocaleString()+' F';
+  document.getElementById('pLivr').textContent=f.toLocaleString()+' F';
+  document.getElementById('pTotal').textContent=(s+f).toLocaleString()+' F';
+  if(state.profil.tel&&!document.getElementById('pTelClient').value)document.getElementById('pTelClient').value=state.profil.tel;
+  var mp=getMoyenDefaut();
+  var pIT=document.getElementById('payInfoText');
+  if(pIT){
+    if(mp){
+      pIT.innerHTML='<b>'+mp.type+'</b><br>'+mp.numero+'<br>Titulaire : '+mp.titulaire+(mp.note?'<br>'+mp.note:'');
+    } else {
+      pIT.textContent='Le vendeur n a pas encore configure ses moyens de reception';
+    }
+  }
+}
+function delPanier(i){state.panier.splice(i,1);renderPanier();}
+function validerCommande(){
+  if(!state.panier.length){toast('Panier vide',true);return;}
+  var q=document.getElementById('pQuartier').value;
+  if(!q){toast('Choisissez quartier',true);return;}
+  var tel=document.getElementById('pTelClient').value.trim();
+  if(!tel){toast('Entrez votre numero',true);return;}
+  var t=0;
+  state.panier.forEach(function(p){t+=p.prix*p.qte});
+  if(curResto)t+=curResto.frais||0;
+  var c={id:'NC241'+Math.floor(Math.random()*90000+10000),resto:curResto?curResto.nom:'Restaurant',quartier:q,items:state.panier.slice(),total:t,date:new Date().toLocaleString('fr-FR'),statut:'En attente',client:state.profil.nom,tel:tel,moyen:curPay};
+  state.commandes.unshift(c);save('o',state.commandes);
+  addNotif({title:'Nouvelle commande',message:c.id+' - '+state.profil.nom+' - '+q+' - '+t.toLocaleString()+' F',tel:tel});
+  var dh=c.items.map(function(i){return '<div class="row mt"><span class="cs">'+i.nom+' x '+i.qte+'</span><span>'+((i.prix*i.qte).toLocaleString())+' F</span></div>'}).join('');
+  addFacture({type:'Commande restaurant',vendeur:c.resto,client:state.profil.nom,tel:tel,moyen:curPay,total:t,details:dh});
+  state.panier=[];
+  toast('Commande '+c.id+' envoyee au vendeur');
+  setTimeout(function(){show('tracking')},900);
+}
+
+function renderHotels(){
+  var h='';
+  state.hotels.forEach(function(x,i){
+    var img=x.photo||IMGS.hotel[i%IMGS.hotel.length];
+    h+='<div class="imgCard" onclick="openHotel(\''+x.id+'\')"><div class="im" style="background-image:url(\''+img+'\')"></div><div class="bd"><div class="tt">'+x.nom+'</div><div class="mt2">'+x.ville+' - '+(x.chambres||[]).length+' types</div></div></div>';
+  });
+  if(!h)h='<div class="emp"><span class="ic">H</span><div class="tt">Aucun hotel</div></div>';
+  document.getElementById('hotelList').innerHTML=h;
+}
+function openHotel(id){
+  curHotel=state.hotels.find(function(h){return h.id===id});if(!curHotel)return;
+  var x=curHotel;
+  document.getElementById('hdName').textContent=x.nom;
+  document.getElementById('hdInfo').textContent=(x.quartier||'')+', '+(x.ville||'');
+  document.getElementById('hdCall').innerHTML=x.tel?'<div class="callBanner"><div style="font-size:13px;font-weight:700;margin-bottom:6px">Contact direct</div><div class="cs" style="color:rgba(255,255,255,0.85)">'+x.tel+'</div><button class="btn btnY mt" onclick="window.location.href=\'tel:'+x.tel+'\'">Appeler</button></div>':'';
+  var h='';
+  (x.chambres||[]).forEach(function(c,i){
+    var img=IMGS.hotel[i%IMGS.hotel.length];
+    h+='<div class="imgCard" style="cursor:default"><div class="im" style="background-image:url(\''+img+'\');height:130px"></div><div class="bd"><div class="row"><div class="ct">'+c.nom+'</div><span class="bdg bgB">'+c.cap+' pers.</span></div><div class="row mt"><div><div class="prc prcL">'+c.prix.toLocaleString()+' F</div><div class="cs">par nuit</div></div><button class="btn btnG btnSm" onclick="reserverHotel(\''+x.nom+'\',\''+c.nom+'\','+c.prix+')">Reserver</button></div></div></div>';
+  });
+  if(!h)h='<div class="emp"><span class="ic">C</span>Aucune chambre</div>';
+  document.getElementById('hdRooms').innerHTML=h;
+  show('hotelDetail');
+}
+function reserverHotel(hotel,chambre,prix){
+  var tel=prompt('Votre numero :',state.profil.tel);if(!tel)return;
+  var moyen=prompt('Paiement ? Airtel Money Moov Money Especes Carte','Airtel Money');if(!moyen)return;
+  addNotif({title:'Reservation hotel',message:chambre+' a '+hotel+' - '+prix.toLocaleString()+' F - '+moyen,tel:tel});
+  addFacture({type:'Reservation hotel',vendeur:hotel,client:state.profil.nom,tel:tel,moyen:moyen,total:prix,details:'<div class="row mt"><span class="cs">'+chambre+' x 1 nuit</span><span>'+prix.toLocaleString()+' F</span></div>'});
+  toast('Reservation envoyee');
+  if(curHotel&&curHotel.tel)setTimeout(function(){if(confirm('Appeler '+hotel+' pour confirmer ?'))window.location.href='tel:'+curHotel.tel;},800);
+}
+
+function renderBus(){
+  var f=(document.getElementById('busFrom')||{}).value||'';
+  var t=(document.getElementById('busTo')||{}).value||'';
+  f=f.toLowerCase();t=t.toLowerCase();
+  var h='';
+  state.trajets.filter(function(x){return (!f||x.de.toLowerCase().indexOf(f)>=0)&&(!t||x.vers.toLowerCase().indexOf(t)>=0)}).forEach(function(x,i){
+    var img=IMGS.bus[i%IMGS.bus.length];
+    var d=x.places-(x.pris||[]).length;
+    h+='<div class="imgCard"><div class="im" style="background-image:url(\''+img+'\')"></div><div class="bd"><div class="tt">'+x.de+' vers '+x.vers+'</div><div class="mt2">'+x.duree+' h - '+d+'/'+x.places+' places</div><div class="mt2">'+x.immat+(x.tel?' - '+x.tel:'')+'</div><div class="prRow"><span class="prc prcL">'+x.prix.toLocaleString()+' F</span><button class="btn btnG btnSm" onclick="choisirTrajet(\''+x.id+'\')">Choisir</button></div></div></div>';
+  });
+  if(!h)h='<div class="emp"><span class="ic">B</span><div class="tt">Aucun trajet</div></div>';
+  document.getElementById('busList').innerHTML=h;
+}
+function choisirTrajet(id){
+  curTrajet=state.trajets.find(function(t){return t.id===id});if(!curTrajet)return;
+  selSeats=[];
+  document.getElementById('bsTitle').textContent=curTrajet.de+' vers '+curTrajet.vers;
+  document.getElementById('bsInfo').textContent=curTrajet.heure+' - '+curTrajet.prix.toLocaleString()+' F par place';
+  document.getElementById('bsBusInfo').innerHTML='<div class="fw">Bus '+curTrajet.immat+'</div>'+(curTrajet.tel?'<div class="cs">Tel : '+curTrajet.tel+'</div>':'')+'<div class="cs">Embarquement : '+(curTrajet.embarq||'Gare')+'</div>';
+  document.getElementById('bsCount').textContent='0';
+  document.getElementById('bsTelClient').value=state.profil.tel||'';
+  renderSeats();
+  show('busSeat');
+}
+function renderSeats(){
+  var h='';
+  for(var i=1;i<=curTrajet.places;i++){
+    var cls='seat';
+    if((curTrajet.pris||[]).indexOf(i)>=0)cls+=' tkn';
+    else if(selSeats.indexOf(i)>=0)cls+=' sel';
+    h+='<div class="'+cls+'" onclick="toggleSeat('+i+')">'+i+'</div>';
+  }
+  document.getElementById('seatGrid').innerHTML=h;
+}
+function toggleSeat(n){
+  if((curTrajet.pris||[]).indexOf(n)>=0){toast('Place prise',true);return;}
+  var i=selSeats.indexOf(n);
+  if(i>=0)selSeats.splice(i,1);else selSeats.push(n);
+  document.getElementById('bsCount').textContent=selSeats.length;
+  renderSeats();
+}
+function confirmerBillets(){
+  if(!selSeats.length){toast('Choisissez une place',true);return;}
+  var tel=document.getElementById('bsTelClient').value.trim();
+  if(!tel){toast('Entrez votre numero',true);return;}
+  var num='NC241'+Math.floor(Math.random()*90000+10000);
+  if(!curTrajet.pris)curTrajet.pris=[];
+  selSeats.forEach(function(s){curTrajet.pris.push(s)});
+  save('t',state.trajets);
+  var b={id:num,trajet:curTrajet.de+' vers '+curTrajet.vers,seats:selSeats.slice(),date:curTrajet.heure,immat:curTrajet.immat,tel:curTrajet.tel,embarq:curTrajet.embarq||'Gare',prix:curTrajet.prix*selSeats.length};
+  state.billets.unshift(b);save('bi',state.billets);
+  addNotif({title:'Reservation bus',message:num+' - '+b.trajet+' - Places '+b.seats.join(',')+' - '+b.prix.toLocaleString()+' F',tel:tel});
+  addFacture({type:'Reservation bus',vendeur:curTrajet.immat,client:state.profil.nom,tel:tel,moyen:'Especes',total:b.prix,details:'<div class="row mt"><span class="cs">'+b.trajet+'</span><span>'+b.prix.toLocaleString()+' F</span></div>'});
+  selSeats=[];
+  var cells='';
+  for(var i=0;i<121;i++)cells+='<div style="width:10px;height:10px;background:'+(Math.random()>0.5?'#000':'#fff')+'"></div>';
+  document.getElementById('qrContent').innerHTML='<div style="display:inline-grid;grid-template-columns:repeat(11,10px);gap:1px">'+cells+'</div><div style="margin-top:10px;font-weight:800">'+b.id+'</div>';
+  document.getElementById('billetDetails').innerHTML='<div class="ct">'+b.trajet+'</div><div class="cs">Depart : '+b.date+'</div><div class="cs">Places : '+b.seats.join(', ')+'</div><div class="cs">Immat : '+b.immat+'</div><div class="row mt" style="border-top:1px solid #1E293B;padding-top:10px"><span class="fw">TOTAL</span><span class="prc prcL">'+b.prix.toLocaleString()+' F</span></div>';
+  document.getElementById('billetTelInfo').textContent=b.tel?'Tel : '+b.tel:'Pas de numero';
+  document.getElementById('btnAppelChauffeur').onclick=function(){if(b.tel)window.location.href='tel:'+b.tel;else toast('Numero indisponible',true);};
+  show('billet');
+}
+
+function envoyerColis(){
+  var f=document.getElementById('colFrom').value.trim();
+  var t=document.getElementById('colTo').value.trim();
+  var tf=document.getElementById('colTelFrom').value.trim();
+  var tel=document.getElementById('colTel').value.trim();
+  var q=document.getElementById('colQuartier').value;
+  var adr=document.getElementById('colAdr').value.trim();
+  var desc=document.getElementById('colDesc').value.trim();
+  var p=parseFloat(document.getElementById('colPoids').value)||1;
+  if(!f||!t||!q||!tf){toast('Remplissez les champs obligatoires',true);return;}
+  var num='NC241'+Math.floor(Math.random()*90000+10000);
+  var c={num:num,from:f,to:t,telFrom:tf,tel:tel,quartier:q,adr:adr,desc:desc,poids:p,date:new Date().toLocaleString('fr-FR'),statut:'Pris en charge'};
+  state.colis.unshift(c);save('c',state.colis);
+  addNotif({title:'Nouveau colis',message:num+' - '+f+' vers '+t+' - '+q,tel:tf});
+  toast('Colis '+num+' enregistre');
+  document.getElementById('colisSearch').value=num;
+  chercherColis();
+  setTimeout(function(){show('colisSuivi')},700);
+}
+function chercherColis(){
+  var q=document.getElementById('colisSearch').value.trim();
+  var f=state.colis.find(function(c){return c.num===q});
+  if(!f){document.getElementById('colisResult').innerHTML='<div class="emp"><span class="ic">?</span>Introuvable</div>';return;}
+  document.getElementById('colisResult').innerHTML='<div class="card"><div class="row"><div class="ct">'+f.num+'</div><span class="bdg bgG">'+f.statut+'</span></div><div class="cs">De : '+f.from+'</div><div class="cs">A : '+f.to+'</div><div class="cs">Quartier : '+f.quartier+'</div><div class="cs">Tel : '+f.tel+'</div><div class="cs">Poids : '+f.poids+' kg</div></div>';
+}
+function commanderTaxi(){
+  var d=document.getElementById('taxiDest').value.trim();
+  var tel=document.getElementById('taxiTel').value.trim();
+  if(!d){toast('Entrez destination',true);return;}
+  if(!tel){toast('Entrez votre numero',true);return;}
+  var from=document.getElementById('taxiFrom').value||'Libreville';
+  var prix=1500+Math.floor(Math.random()*3000);
+  addNotif({title:'Nouvelle course taxi',message:from+' vers '+d+' - '+prix.toLocaleString()+' F',tel:tel});
+  addFacture({type:'Course taxi',vendeur:'Taxi',client:state.profil.nom,tel:tel,moyen:'Especes',total:prix,details:'<div class="row mt"><span class="cs">'+from+' vers '+d+'</span><span>'+prix.toLocaleString()+' F</span></div>'});
+  toast('Course demandee');
+  setTimeout(function(){show('tracking')},800);
+}
+
+function toggleOnline(){
+  online=!online;
+  document.getElementById('onlineTxt').textContent=online?'En ligne':'Hors ligne';
+  document.getElementById('onlineHint').textContent=online?'Vous recevez des courses':'Touchez pour activer';
+  document.getElementById('onlineIcon').textContent=online?'ON':'X';
+  document.getElementById('onlineIcon').style.color=online?'#4ADE80':'#94A3B8';
+  document.getElementById('onlineCard').style.background=online?'linear-gradient(135deg,#009E60,#007A4A)':'#111827';
+  renderCourses();
+}
+function renderLivreur(){
+  document.getElementById('livName').textContent=state.profil.nom+' - '+state.profil.ville;
+  document.getElementById('livAvatar').textContent=state.profil.nom.charAt(0).toUpperCase();
+  document.getElementById('livGains').textContent=state.livGains.toLocaleString()+' F';
+  document.getElementById('livCourses').textContent=state.livCourses;
+  document.getElementById('livZonesCount').textContent=state.mesZones.length;
+  var zh='';
+  if(!state.mesZones.length)zh='<div class="emp"><span class="ic">Z</span>Aucune zone</div>';
+  else zh=state.mesZones.map(function(z){return '<span class="bdg bgG" style="margin:2px">'+z+'</span>'}).join('');
+  document.getElementById('myZones').innerHTML=zh;
+  var th='';
+  Object.keys(state.mesTarifs).forEach(function(k){
+    th+='<div class="card"><div class="row"><div class="fw">'+k+'</div><div class="prc">'+state.mesTarifs[k]+' F</div></div></div>';
+  });
+  if(!th)th='<div class="emp"><span class="ic">T</span>Aucun tarif</div>';
+  document.getElementById('myTarifs').innerHTML=th;
+  renderCourses();
+}
+function renderCourses(){
+  var list=document.getElementById('coursesList');if(!list)return;
+  if(!online){list.innerHTML='<div class="emp"><span class="ic">Z</span><div class="tt">Hors ligne</div></div>';return;}
+  var h='',found=false;
+  state.commandes.forEach(function(c){
+    if(c.statut==='Livree')return;
+    found=true;
+    h+='<div class="card"><div class="row"><div class="ct">'+c.id+'</div><div class="prc">'+c.total.toLocaleString()+' F</div></div><div class="cs">Client : '+c.client+'</div><div class="cs">Tel : '+c.tel+'</div><div class="cs">Quartier : '+c.quartier+'</div><div class="cs">Resto : '+c.resto+'</div><div style="display:flex;gap:8px;margin-top:10px"><button class="btn btnG btnSm" style="flex:1" onclick="accepterCommande(\''+c.id+'\')">Accepter</button><button class="btn btnO btnSm" onclick="window.location.href=\'tel:'+c.tel+'\'">Appeler</button></div></div>';
+  });
+  if(!found)h='<div class="emp"><span class="ic">C</span>Aucune course</div>';
+  list.innerHTML=h;
+}
+function accepterCommande(id){
+  var c=state.commandes.find(function(x){return x.id===id});if(!c)return;
+  c.statut='En livraison';state.livGains+=Math.round(c.total*0.15);state.livCourses++;
+  save('o',state.commandes);save('lg',state.livGains);save('lc',state.livCourses);
+  toast('Course acceptee');renderLivreur();
+}
+function renderZones(){
+  var h='';
+  state.quartiers.forEach(function(q){
+    var key=q.nom+' '+q.ville;
+    var on=state.mesZones.indexOf(key)>=0;
+    h+='<div class="card" style="cursor:pointer" onclick="toggleZone(\''+key+'\')"><div class="row"><div><div class="fw">'+q.nom+'</div><div class="cs">'+q.ville+'</div></div><span class="bdg '+(on?'bgG':'bgB')+'">'+(on?'Couvert':'Ajouter')+'</span></div></div>';
+  });
+  if(!h)h='<div class="emp"><span class="ic">Q</span>Aucun quartier</div>';
+  document.getElementById('zoneList').innerHTML=h;
+}
+function toggleZone(k){
+  var i=state.mesZones.indexOf(k);
+  if(i>=0)state.mesZones.splice(i,1);else state.mesZones.push(k);
+  renderZones();
+}
+function saveZones(){save('mz',state.mesZones);toast('Zones enregistrees');setTimeout(function(){show('livreur')},600);}
+function renderTarifs(){
+  var h='';
+  if(!state.mesZones.length)h='<div class="emp"><span class="ic">Z</span>Definissez vos zones d abord</div>';
+  else state.mesZones.forEach(function(z,i){
+    var v=state.mesTarifs[z]||1000;
+    h+='<div class="card"><div class="fw">'+z+'</div><input class="inp" type="number" id="t'+i+'" value="'+v+'"><button class="btn btnO btnSm mt" onclick="setTarif('+i+')">Valider</button></div>';
+  });
+  document.getElementById('tarifList').innerHTML=h;
+}
+function setTarif(i){
+  var z=state.mesZones[i];
+  var v=parseInt(document.getElementById('t'+i).value)||0;
+  state.mesTarifs[z]=v;save('mt',state.mesTarifs);
+  toast(z+' : '+v+' F');
+}
+function saveTarifs(){save('mt',state.mesTarifs);toast('Tarifs enregistres');setTimeout(function(){show('livreur')},600);}
+
+function renderRestoPro(){
+  var r=state.restoPro;
+  var h='';
+  if(!r||!r.nom)h='<div class="emp"><span class="ic">R</span><div class="tt">Completez vos infos</div>Ajoutez votre nom, telephone et menu</div>';
+  else h='<div class="imgCard" style="cursor:default"><div class="im" style="background-image:url(\''+(r.photo||IMGS.resto[0])+'\')"></div><div class="bd"><div class="tt">'+r.nom+'</div><div class="mt2">'+(r.quartier||'')+', '+(r.ville||'')+'</div><div class="mt2">Tel : '+(r.tel||'-')+'</div><div class="mt2">Livraison : '+(r.frais||0)+' F - '+(r.menu||[]).length+' plats</div></div></div>';
+  document.getElementById('restoProContent').innerHTML=h;
+  var ch='';
+  state.commandes.forEach(function(c){
+    ch+='<div class="card"><div class="row"><div class="ct">'+c.id+'</div><span class="bdg bgO">'+c.statut+'</span></div><div class="cs">Client : '+c.client+' - Tel : '+c.tel+'</div><div class="cs">Quartier : '+c.quartier+'</div><div style="display:flex;gap:8px;margin-top:10px"><button class="btn btnG btnSm" style="flex:1" onclick="toast(\'Validee\')">Valider</button><button class="btn btnO btnSm" onclick="window.location.href=\'tel:'+c.tel+'\'">Appeler</button></div></div>';
+  });
+  if(!ch)ch='<div class="emp"><span class="ic">C</span>Aucune commande</div>';
+  document.getElementById('restoOrders').innerHTML=ch;
+}
+function saveRestoInfo(){
+  var nom=document.getElementById('riNom').value.trim();
+  if(!nom){toast('Nom obligatoire',true);return;}
+  state.restoPro={
+    id:state.restoPro&&state.restoPro.id?state.restoPro.id:'r'+Date.now(),
+    nom:nom,
+    ville:document.getElementById('riVille').value.trim(),
+    quartier:document.getElementById('riQuartier').value.trim(),
+    cuisine:document.getElementById('riCuisine').value.trim(),
+    tel:document.getElementById('riTel').value.trim(),
+    gps:document.getElementById('riGps').value.trim(),
+    photo:document.getElementById('riPhoto').value.trim(),
+    frais:state.restoPro&&state.restoPro.frais?state.restoPro.frais:1000,
+    zones:state.restoPro&&state.restoPro.zones?state.restoPro.zones:[],
+    menu:state.restoPro&&state.restoPro.menu?state.restoPro.menu:[]
+  };
+  save('rp',state.restoPro);pubResto();
+  toast('Enregistre');setTimeout(function(){show('restoPro')},600);
+}
+function pubResto(){
+  if(!state.restoPro||!state.restoPro.nom)return;
+  var i=state.restos.findIndex(function(r){return r.id===state.restoPro.id});
+  if(i>=0)state.restos[i]=state.restoPro;else state.restos.push(state.restoPro);
+  save('r',state.restos);
+}
+function renderMenuPro(){
+  var r=state.restoPro;
+  var h='';
+  if(!r||!(r.menu||[]).length)h='<div class="emp"><span class="ic">M</span>Aucun plat</div>';
+  else r.menu.forEach(function(m,i){
+    h+='<div class="imgCard" style="cursor:default"><div class="im" style="background-image:url(\''+(m.photo||IMGS.plats[i%IMGS.plats.length])+'\');height:100px"></div><div class="bd"><div class="row"><div><div class="fw">'+m.nom+'</div><div class="prc mt">'+m.prix.toLocaleString()+' F</div></div><button class="btn btnO btnSm" onclick="delPlat('+i+')">X</button></div></div></div>';
+  });
+  document.getElementById('menuProList').innerHTML=h;
+}
+function addPlat(){
+  var nom=document.getElementById('nmNom').value.trim();
+  var prix=parseInt(document.getElementById('nmPrix').value)||0;
+  if(!nom||!prix){toast('Nom et prix obligatoires',true);return;}
+  if(!state.restoPro)state.restoPro={menu:[],zones:[]};
+  if(!state.restoPro.menu)state.restoPro.menu=[];
+  state.restoPro.menu.push({nom:nom,prix:prix,desc:document.getElementById('nmDesc').value.trim(),photo:document.getElementById('nmPhoto').value.trim()});
+  save('rp',state.restoPro);pubResto();
+  document.getElementById('nmNom').value='';document.getElementById('nmPrix').value='';
+  toast('Plat ajoute');renderMenuPro();
+}
+function delPlat(i){state.restoPro.menu.splice(i,1);save('rp',state.restoPro);pubResto();renderMenuPro();}
+function renderRestoLivraison(){
+  if(state.restoPro)document.getElementById('rlFrais').value=state.restoPro.frais||1000;
+  var h='';
+  state.quartiers.forEach(function(q){
+    var key=q.nom+' '+q.ville;
+    var on=state.restoPro&&(state.restoPro.zones||[]).indexOf(key)>=0;
+    h+='<div class="card" style="cursor:pointer" onclick="toggleRestoZone(\''+key+'\')"><div class="row"><div><div class="fw">'+q.nom+'</div><div class="cs">'+q.ville+'</div></div><span class="bdg '+(on?'bgG':'bgB')+'">'+(on?'OK':'Ajouter')+'</span></div></div>';
+  });
+  document.getElementById('restoZonesList').innerHTML=h;
+}
+function toggleRestoZone(key){
+  if(!state.restoPro)state.restoPro={zones:[],menu:[]};
+  if(!state.restoPro.zones)state.restoPro.zones=[];
+  var i=state.restoPro.zones.indexOf(key);
+  if(i>=0)state.restoPro.zones.splice(i,1);else state.restoPro.zones.push(key);
+  renderRestoLivraison();
+}
+function saveRestoLivraison(){
+  if(!state.restoPro)state.restoPro={};
+  state.restoPro.frais=parseInt(document.getElementById('rlFrais').value)||0;
+  save('rp',state.restoPro);pubResto();
+  toast('Livraison enregistree');setTimeout(function(){show('restoPro')},600);
+}
+
+function renderHotelPro(){
+  var h=state.hotelPro;
+  var html='';
+  if(!h||!h.nom)html='<div class="emp"><span class="ic">H</span><div class="tt">Completez vos infos</div></div>';
+  else html='<div class="imgCard" style="cursor:default"><div class="im" style="background-image:url(\''+(h.photo||IMGS.hotel[0])+'\')"></div><div class="bd"><div class="tt">'+h.nom+'</div><div class="mt2">'+(h.quartier||'')+', '+(h.ville||'')+'</div><div class="mt2">Tel : '+(h.tel||'-')+'</div><div class="mt2">'+(h.chambres||[]).length+' types</div></div></div>';
+  document.getElementById('hotelProContent').innerHTML=html;
+}
+function saveHotelInfo(){
+  var nom=document.getElementById('hiNom').value.trim();
+  if(!nom){toast('Nom obligatoire',true);return;}
+  state.hotelPro={
+    id:state.hotelPro&&state.hotelPro.id?state.hotelPro.id:'h'+Date.now(),
+    nom:nom,
+    ville:document.getElementById('hiVille').value.trim(),
+    quartier:document.getElementById('hiQuartier').value.trim(),
+    tel:document.getElementById('hiTel').value.trim(),
+    gps:document.getElementById('hiGps').value.trim(),
+    photo:document.getElementById('hiPhoto').value.trim(),
+    desc:document.getElementById('hiDesc').value.trim(),
+    chambres:state.hotelPro&&state.hotelPro.chambres?state.hotelPro.chambres:[]
+  };
+  save('hp',state.hotelPro);pubHotel();
+  toast('Enregistre');setTimeout(function(){show('hotelPro')},600);
+}
+function pubHotel(){
+  if(!state.hotelPro||!state.hotelPro.nom)return;
+  var i=state.hotels.findIndex(function(h){return h.id===state.hotelPro.id});
+  if(i>=0)state.hotels[i]=state.hotelPro;else state.hotels.push(state.hotelPro);
+  save('h',state.hotels);
+}
+function renderChambres(){
+  var h=state.hotelPro;
+  var html='';
+  if(!h||!(h.chambres||[]).length)html='<div class="emp"><span class="ic">C</span>Aucune chambre</div>';
+  else h.chambres.forEach(function(c,i){
+    html+='<div class="imgCard" style="cursor:default"><div class="im" style="background-image:url(\''+IMGS.hotel[i%IMGS.hotel.length]+'\');height:110px"></div><div class="bd"><div class="row"><div><div class="fw">'+c.nom+'</div><div class="cs">'+c.cap+' pers.</div></div><button class="btn btnO btnSm" onclick="delChambre('+i+')">X</button></div><div class="prc mt">'+c.prix.toLocaleString()+' F / nuit</div></div></div>';
+  });
+  document.getElementById('chambresList').innerHTML=html;
+}
+function addChambre(){
+  var nom=document.getElementById('ncNom').value.trim();
+  var prix=parseInt(document.getElementById('ncPrix').value)||0;
+  if(!nom||!prix){toast('Nom et prix obligatoires',true);return;}
+  if(!state.hotelPro)state.hotelPro={chambres:[]};
+  if(!state.hotelPro.chambres)state.hotelPro.chambres=[];
+  state.hotelPro.chambres.push({nom:nom,prix:prix,sem:parseInt(document.getElementById('ncSem').value)||0,mois:parseInt(document.getElementById('ncMois').value)||0,cap:parseInt(document.getElementById('ncCap').value)||2});
+  save('hp',state.hotelPro);pubHotel();
+  document.getElementById('ncNom').value='';document.getElementById('ncPrix').value='';
+  toast('Chambre ajoutee');renderChambres();
+}
+function delChambre(i){state.hotelPro.chambres.splice(i,1);save('hp',state.hotelPro);pubHotel();renderChambres();}
+
+function renderBusPro(){
+  var h='';
+  state.trajets.forEach(function(t,i){
+    h+='<div class="imgCard" style="cursor:default"><div class="im" style="background-image:url(\''+IMGS.bus[i%IMGS.bus.length]+'\');height:100px"></div><div class="bd"><div class="row"><div class="fw">'+t.de+' vers '+t.vers+'</div><span class="bdg bgB">'+t.heure+'</span></div><div class="cs">Bus '+t.immat+' - '+(t.places-(t.pris||[]).length)+'/'+t.places+'</div><div class="cs">'+t.prix.toLocaleString()+' F</div></div></div>';
+  });
+  if(!h)h='<div class="emp"><span class="ic">B</span>Aucun trajet</div>';
+  document.getElementById('busProTrajets').innerHTML=h;
+}
+function renderBusList2(){
+  var h='';
+  state.bus.forEach(function(b,i){
+    h+='<div class="imgCard" style="cursor:default"><div class="im" style="background-image:url(\''+IMGS.bus[i%IMGS.bus.length]+'\');height:110px"></div><div class="bd"><div class="row"><div class="fw">'+b.immat+'</div><span class="bdg bgG">Actif</span></div><div class="cs">'+b.modele+' - '+b.places+' places - '+b.clim+'</div>'+(b.tel?'<div class="cs">Tel : '+b.tel+'</div>':'')+'</div></div>';
+  });
+  if(!h)h='<div class="emp"><span class="ic">B</span>Aucun vehicule</div>';
+  document.getElementById('busList2').innerHTML=h;
+}
+function addBus(){
+  var imm=document.getElementById('nbImm').value.trim();
+  if(!imm){toast('Immatriculation obligatoire',true);return;}
+  state.bus.push({id:'b'+Date.now(),immat:imm,modele:document.getElementById('nbModele').value.trim(),places:parseInt(document.getElementById('nbPlaces').value)||45,tel:document.getElementById('nbTel').value.trim(),clim:document.getElementById('nbClim').value});
+  save('b',state.bus);
+  document.getElementById('nbImm').value='';
+  toast('Bus ajoute');renderBusList2();
+}
+function fillBusForm(){
+  var s=document.getElementById('btBus');
+  var h='';
+  state.bus.forEach(function(b){h+='<option value="'+b.immat+'">'+b.immat+' - '+b.modele+'</option>';});
+  if(!h)h='<option value="">Aucun bus</option>';
+  s.innerHTML=h;
+}
+function publierTrajet(){
+  var from=document.getElementById('btFrom').value.trim();
+  var to=document.getElementById('btTo').value.trim();
+  var imm=document.getElementById('btBus').value;
+  if(!from||!to||!imm){toast('Remplissez tout',true);return;}
+  var tel='';
+  state.bus.forEach(function(b){if(b.immat===imm)tel=b.tel;});
+  var t={id:'t'+Date.now(),de:from,vers:to,heure:document.getElementById('btHeure').value||'08:00',duree:parseInt(document.getElementById('btDuree').value)||5,prix:parseInt(document.getElementById('btPrix').value)||10000,immat:imm,tel:tel,embarq:document.getElementById('btEmbarq').value.trim()||'Gare',places:45,pris:[]};
+  state.bus.forEach(function(b){if(b.immat===imm)t.places=b.places;});
+  state.trajets.push(t);save('t',state.trajets);
+  toast('Trajet publie');setTimeout(function(){show('busPro')},700);
+}
+
+function renderTaxiPro(){
+  var i=state.taxiInfo;
+  var h='';
+  if(!i||!i.imm)h='<div class="emp"><span class="ic">T</span>Ajoutez votre vehicule</div>';
+  else h='<div class="imgCard" style="cursor:default"><div class="im" style="background-image:url(\''+IMGS.taxi[0]+'\');height:110px"></div><div class="bd"><div class="ct">'+i.imm+'</div><div class="cs">'+i.modele+' - '+i.ville+'</div><div class="cs">Tel : '+(i.tel||'-')+'</div></div></div>';
+  var t=state.taxiTarifs;
+  h+='<div class="card"><div class="fw">Mes tarifs</div><div class="cs">Base : '+t.base+' F</div><div class="cs">Par km : '+t.km+' F</div><div class="cs">Nuit : '+t.nuit+' F</div></div>';
+  document.getElementById('taxiProContent').innerHTML=h;
+}
+function saveTaxiInfo(){
+  var imm=document.getElementById('tiImm').value.trim();
+  if(!imm){toast('Immatriculation obligatoire',true);return;}
+  state.taxiInfo={imm:imm,modele:document.getElementById('tiModele').value.trim(),ville:document.getElementById('tiVille').value.trim(),tel:document.getElementById('tiTel').value.trim(),zones:document.getElementById('tiZones').value.trim()};
+  save('ti',state.taxiInfo);
+  toast('Enregistre');setTimeout(function(){show('taxiPro')},600);
+}
+function saveTaxiTarifs(){
+  state.taxiTarifs={base:parseInt(document.getElementById('ttBase').value)||1500,km:parseInt(document.getElementById('ttKm').value)||500,nuit:parseInt(document.getElementById('ttNuit').value)||2500};
+  save('tt',state.taxiTarifs);
+  toast('Tarifs enregistres');setTimeout(function(){show('taxiPro')},600);
+}
+
+var ETAB_LABELS={magasin:'Magasin',salon:'Salon de coiffure',snack:'Snack bar',boite:'Boite de nuit'};
+
+function showEtabPro(t){
+  curEtabType=t;
+  document.getElementById('etabTitle').textContent='Mon '+ETAB_LABELS[t].toLowerCase();
+  document.getElementById('etabAvatar').textContent=ETAB_LABELS[t].charAt(0);
+  document.getElementById('etabArtTitle').textContent=t==='salon'?'Mes services':'Mes articles';
+  show('etabPro');
+}
+function getEtabPro(){
+  if(!state.etabs)state.etabs=[];
+  return state.etabs.find(function(e){return e.id===('etab_'+curEtabType)});
+}
+function renderEtabPro(){
+  var e=getEtabPro();
+  var h='';
+  if(!e||!e.nom)h='<div class="emp"><span class="ic">'+ETAB_LABELS[curEtabType].charAt(0)+'</span><div class="tt">Completez vos infos</div>Ajoutez le nom et le telephone</div>';
+  else h='<div class="imgCard" style="cursor:default"><div class="im" style="background-image:url(\''+(e.photo||IMGS.etab[0])+'\')"></div><div class="bd"><div class="tt">'+e.nom+'</div><div class="mt2">'+e.ville+' - '+(e.quartier||'')+'</div><div class="mt2">Tel : '+(e.tel||'-')+'</div><div class="mt2">'+(e.articles||[]).length+' article(s)</div></div></div>';
+  document.getElementById('etabProContent').innerHTML=h;
+  var ch='';
+  state.commandes.forEach(function(c){
+    ch+='<div class="card"><div class="row"><div class="ct">'+c.id+'</div><span class="bdg bgO">'+c.statut+'</span></div><div class="cs">Client : '+c.client+' - Tel : '+c.tel+'</div><div class="cs">Quartier : '+c.quartier+'</div><div style="display:flex;gap:8px;margin-top:10px"><button class="btn btnG btnSm" style="flex:1" onclick="toast(\'Validee\')">Valider</button><button class="btn btnO btnSm" onclick="window.location.href=\'tel:'+c.tel+'\'">Appeler</button></div></div>';
+  });
+  if(!ch)ch='<div class="emp"><span class="ic">C</span>Aucune commande</div>';
+  document.getElementById('etabOrders').innerHTML=ch;
+}
+function renderEtabInfoForm(){
+  var e=getEtabPro();
+  if(e){
+    document.getElementById('eiNom').value=e.nom||'';
+    document.getElementById('eiVille').value=e.ville||'';
+    document.getElementById('eiQuartier').value=e.quartier||'';
+    document.getElementById('eiDesc').value=e.desc||'';
+    document.getElementById('eiTel').value=e.tel||state.profil.tel||'';
+    document.getElementById('eiGps').value=e.gps||'';
+    document.getElementById('eiPhoto').value=e.photo||'';
+  } else if(state.profil.tel){
+    document.getElementById('eiTel').value=state.profil.tel;
+  }
+}
+function saveEtabInfo(){
+  var nom=document.getElementById('eiNom').value.trim();
+  if(!nom){toast('Nom obligatoire',true);return;}
+  var tel=document.getElementById('eiTel').value.trim();
+  if(!tel){toast('Telephone obligatoire',true);return;}
+  if(!state.etabs)state.etabs=[];
+  var id='etab_'+curEtabType;
+  var i=state.etabs.findIndex(function(e){return e.id===id});
+  var obj={
+    id:id,
+    type:curEtabType,
+    nom:nom,
+    ville:document.getElementById('eiVille').value.trim()||'Libreville',
+    quartier:document.getElementById('eiQuartier').value.trim(),
+    desc:document.getElementById('eiDesc').value.trim(),
+    tel:tel,
+    gps:document.getElementById('eiGps').value.trim(),
+    photo:document.getElementById('eiPhoto').value.trim(),
+    articles:i>=0&&state.etabs[i].articles?state.etabs[i].articles:[]
+  };
+  if(i>=0)state.etabs[i]=obj;else state.etabs.push(obj);
+  save('etabs',state.etabs);
+  if(!state.profil.tel){state.profil.tel=tel;save('p',state.profil);}
+  toast('Enregistre');
+  setTimeout(function(){show('etabPro')},600);
+}
+function renderEtabArticles(){
+  var e=getEtabPro();
+  var h='';
+  if(!e||!(e.articles||[]).length)h='<div class="emp"><span class="ic">+</span><div class="tt">Aucun article</div>Ajoutez vos produits ou services</div>';
+  else e.articles.forEach(function(a,i){
+    h+='<div class="imgCard" style="cursor:default"><div class="im" style="background-image:url(\''+(a.photo||IMGS.plats[i%IMGS.plats.length])+'\');height:100px"></div><div class="bd"><div class="row"><div><div class="fw">'+a.nom+'</div>'+(a.desc?'<div class="cs">'+a.desc+'</div>':'')+'<div class="prc mt">'+a.prix.toLocaleString()+' F</div></div><button class="btn btnO btnSm" onclick="delEtabArticle('+i+')">X</button></div></div></div>';
+  });
+  document.getElementById('etabArtList').innerHTML=h;
+}
+function addEtabArticle(){
+  var nom=document.getElementById('eaNom').value.trim();
+  var prix=parseInt(document.getElementById('eaPrix').value)||0;
+  if(!nom||!prix){toast('Nom et prix obligatoires',true);return;}
+  var e=getEtabPro();
+  if(!e){toast('Enregistrez d abord vos infos',true);return;}
+  if(!e.articles)e.articles=[];
+  e.articles.push({nom:nom,prix:prix,desc:document.getElementById('eaDesc').value.trim(),photo:document.getElementById('eaPhoto').value.trim()});
+  save('etabs',state.etabs);
+  document.getElementById('eaNom').value='';document.getElementById('eaPrix').value='';
+  document.getElementById('eaDesc').value='';document.getElementById('eaPhoto').value='';
+  toast('Article ajoute');renderEtabArticles();
+}
+function delEtabArticle(i){
+  var e=getEtabPro();
+  if(!e||!e.articles)return;
+  e.articles.splice(i,1);
+  save('etabs',state.etabs);
+  renderEtabArticles();
+}
+
+function renderConvs(){
+  var list=['Le Manguier','Okoume Palace','Livreur Pierre'];
+  var h='';
+  list.forEach(function(n){
+    h+='<div class="card" style="cursor:pointer" onclick="openChat(\''+n+'\')"><div class="row"><div class="fw">'+n+'</div><span>&gt;</span></div></div>';
+  });
+  document.getElementById('convList').innerHTML=h;
+}
+function openChat(nom){curChat=nom;document.getElementById('chatTitle').textContent=nom;renderChat();show('chat');}
+function renderChat(){
+  if(!state.chats[curChat])state.chats[curChat]=[{moi:false,txt:'Bonjour comment puis je aider'}];
+  var h='';
+  state.chats[curChat].forEach(function(m){
+    var bg=m.moi?'#009E60':'#1E293B';
+    var al=m.moi?'flex-end':'flex-start';
+    h+='<div style="align-self:'+al+';max-width:80%;padding:10px 14px;border-radius:14px;background:'+bg+';font-size:13px">'+m.txt+'</div>';
+  });
+  document.getElementById('chatBox').innerHTML=h;
+}
+function envoyerMessage(){
+  var inp=document.getElementById('chatInput');
+  var t=inp.value.trim();if(!t)return;
+  state.chats[curChat].push({moi:true,txt:t});
+  save('ch',state.chats);inp.value='';renderChat();
+  setTimeout(function(){
+    state.chats[curChat].push({moi:false,txt:'Merci je regarde'});
+    save('ch',state.chats);renderChat();
+  },1000);
+}
+
+function switchRole(){
+  var rs=['client','resto','hotel','livreur','bus','taxi','magasin','salon','snack','boite'];
+  var n=rs[(rs.indexOf(role)+1)%rs.length];
+  role=n;
+  var lb={client:'Client',resto:'Restaurant',hotel:'Hotel',livreur:'Livreur',bus:'Chauffeur Bus',taxi:'Chauffeur Taxi',magasin:'Magasin',salon:'Salon de coiffure',snack:'Snack bar',boite:'Boite de nuit'};
+  document.getElementById('roleBadge').textContent=lb[n];
+  show('login');
+  document.querySelectorAll('.role').forEach(function(c){c.classList.toggle('sel',c.getAttribute('data-role')===n);});
+  toast('Role : '+lb[n]);
+}
+function toast(msg,err){
+  var t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.toggle('err',!!err);
+  t.classList.add('on');
+  setTimeout(function(){t.classList.remove('on');},2400);
+}
+
+var HERO=[
+  {t:'Bienvenue au Gabon',s:'De Bikele a Tchibanga, vivez l aventure'},
+  {t:'Faune sauvage',s:'Elephants, gorilles, buffles'},
+  {t:'Foret equatoriale',s:'La deuxieme poumon vert de la planete'},
+  {t:'Fleuve Ogooue',s:'Le plus grand fleuve du Gabon'},
+  {t:'Plages et ocean',s:'L Atlantique et ses lagunes'},
+  {t:'Port et aeroport',s:'Portes d entree du pays'},
+  {t:'Oiseaux et biodiversite',s:'Une richesse naturelle unique'},
+  {t:'Routes forestieres',s:'Grumiers et transport du bois'},
+  {t:'Villes gabonaises',s:'Libreville, Port-Gentil, Franceville'},
+  {t:'Gastronomie',s:'Nyembwe, poisson braise, odika'}
+];
+function rotHero(){
+  var s=document.querySelectorAll('.heroSlider');
+  if(!s.length)return;
+  s.forEach(function(x){x.classList.remove('act')});
+  heroI=(heroI+1)%s.length;
+  s[heroI].classList.add('act');
+  var d=HERO[heroI];
+  if(d){
+    document.getElementById('heroTitle').textContent=d.t;
+    document.getElementById('heroSub').textContent=d.s;
+  }
+}
+setInterval(rotHero,3800);
+
+renderProfil();
+setTimeout(function(){
+  document.getElementById('splash').classList.add('hide');
+  show('login');
+},1500);
+</script>
+</body>
+</html>
