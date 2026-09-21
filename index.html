@@ -111,7 +111,6 @@ h1{font-size:26px;font-weight:800}
 .jobCard{background:#111827;border-radius:14px;overflow:hidden;border:1px solid #1E293B;margin-bottom:10px;border-left:4px solid #7C3AED}
 .jobCard .bd{padding:14px}
 .jobTag{display:inline-block;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;background:rgba(124,58,237,0.2);color:#A78BFA;margin-right:6px;margin-top:4px}
-/* Styles pour les programmes de voyage */
 .progRow{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #1E293B;font-size:13px}
 .progRow:last-child{border-bottom:none}
 .progDay{font-weight:700;color:#FCD116;min-width:80px}
@@ -125,6 +124,18 @@ h1{font-size:26px;font-weight:800}
 .tarifRow{display:flex;justify-content:space-between;padding:8px 0;font-size:13px;border-bottom:1px solid rgba(30,41,59,0.5)}
 .tarifRow:last-child{border-bottom:none}
 .infoBox{background:rgba(0,158,96,0.1);border:1px solid rgba(0,158,96,0.3);border-radius:12px;padding:12px;margin-bottom:12px}
+.healthCard{background:#111827;border-radius:14px;overflow:hidden;border:1px solid #1E293B;margin-bottom:10px;border-left:4px solid #EF4444}
+.healthCard .bd{padding:14px}
+.eduCard{background:#111827;border-radius:14px;overflow:hidden;border:1px solid #1E293B;margin-bottom:10px;border-left:4px solid #F59E0B}
+.eduCard .bd{padding:14px}
+.assurCard{background:#111827;border-radius:14px;overflow:hidden;border:1px solid #1E293B;margin-bottom:10px;border-left:4px solid #06B6D4}
+.assurCard .bd{padding:14px}
+.vehiculeCard{background:#111827;border-radius:14px;overflow:hidden;border:1px solid #1E293B;margin-bottom:10px;border-left:4px solid #3B82F6}
+.vehiculeCard .bd{padding:14px}
+.maisonCard{background:#111827;border-radius:14px;overflow:hidden;border:1px solid #1E293B;margin-bottom:10px;border-left:4px solid #10B981}
+.maisonCard .bd{padding:14px}
+.logiCard{background:#111827;border-radius:14px;overflow:hidden;border:1px solid #1E293B;margin-bottom:10px;border-left:4px solid #F97316}
+.logiCard .bd{padding:14px}
 </style>
 </head>
 <body>
@@ -164,7 +175,13 @@ h1{font-size:26px;font-weight:800}
 </div>
 <div class="sec">💼 EMPLOI & RECRUTEMENT</div>
 <div class="roleGrid" style="grid-template-columns:1fr">
-<div class="role" onclick="pickRole(this,'recrutement')"><span class="ic">💼</span><div class="nm">Recrutement / Emploi</div><div class="ds">Publier des offres d emploi, stages, missions</div></div>
+<div class="role" onclick="pickRole(this,'recrutement')"><span class="ic">💼</span><div class="nm">Recrutement / Emploi</div><div class="ds">Publier des offres d emploi, stages</div></div>
+</div>
+<div class="sec">🎓 ÉDUCATION & SANTÉ</div>
+<div class="roleGrid">
+<div class="role" onclick="pickRole(this,'universite')"><span class="ic">🎓</span><div class="nm">Universite & Ecole</div></div>
+<div class="role" onclick="pickRole(this,'sante')"><span class="ic">🏥</span><div class="nm">Centre de sante</div></div>
+<div class="role" onclick="pickRole(this,'assurance')"><span class="ic">🛡️</span><div class="nm">Assurance</div></div>
 </div>
 <div class="sec">🏪 COMMERCES & SERVICES</div>
 <div class="roleGrid">
@@ -175,7 +192,7 @@ h1{font-size:26px;font-weight:800}
 <div class="role" onclick="pickRole(this,'snack')"><span class="ic">☕</span><div class="nm">Snack / Cafeteria</div></div>
 <div class="role" onclick="pickRole(this,'bar')"><span class="ic">🍺</span><div class="nm">Bar</div></div>
 </div>
-<div class="sec">🚗 TRANSPORT & LIVRAISON</div>
+<div class="sec">🚗 TRANSPORT, VEHICULES & LOGEMENT</div>
 <div class="roleGrid">
 <div class="role" onclick="pickRole(this,'livreur')"><span class="ic">📦</span><div class="nm">Livreur</div></div>
 <div class="role" onclick="pickRole(this,'taxi')"><span class="ic">🚕</span><div class="nm">Taxi / VTC</div></div>
@@ -183,6 +200,9 @@ h1{font-size:26px;font-weight:800}
 <div class="role" onclick="pickRole(this,'train')"><span class="ic">🚆</span><div class="nm">Train / Setrag</div></div>
 <div class="role" onclick="pickRole(this,'avion')"><span class="ic">✈️</span><div class="nm">Compagnie aerienne</div></div>
 <div class="role" onclick="pickRole(this,'bateau')"><span class="ic">🚢</span><div class="nm">Compagnie maritime</div></div>
+<div class="role" onclick="pickRole(this,'location_vehicule')"><span class="ic">🚙</span><div class="nm">Location vehicules</div><div class="ds">Location & vente</div></div>
+<div class="role" onclick="pickRole(this,'immobilier')"><span class="ic">🏠</span><div class="nm">Maisons</div><div class="ds">Location & vente</div></div>
+<div class="role" onclick="pickRole(this,'logistique')"><span class="ic">🚛</span><div class="nm">Logistique & transport</div></div>
 </div>
 <div class="sec">🎉 EVENEMENTS & LOISIRS</div>
 <div class="roleGrid">
@@ -213,7 +233,7 @@ h1{font-size:26px;font-weight:800}
 <label class="lbl">Nom complet</label>
 <input class="inp" id="auNom" placeholder="Ex: Jean Dupont">
 <label class="lbl">Nom etablissement / service</label>
-<input class="inp" id="auEtab" placeholder="Ex: Restaurant Le Manguier">
+<input class="inp" id="auEtab" placeholder="Ex: Universite Omar Bongo">
 <label class="lbl">Adresse email</label>
 <input class="inp" id="auEmail" type="email" placeholder="exemple@mail.com">
 <label class="lbl">Mot de passe</label>
@@ -262,6 +282,12 @@ h1{font-size:26px;font-weight:800}
 <div class="sec">📋 Categories</div>
 <div class="srvGrid">
 <div class="srvItem" onclick="show('categorie','recrutement')"><div class="srvIc">💼</div><div class="srvLb">Emploi</div></div>
+<div class="srvItem" onclick="show('categorie','universite')"><div class="srvIc">🎓</div><div class="srvLb">Ecoles</div></div>
+<div class="srvItem" onclick="show('categorie','sante')"><div class="srvIc">🏥</div><div class="srvLb">Sante</div></div>
+<div class="srvItem" onclick="show('categorie','assurance')"><div class="srvIc">🛡️</div><div class="srvLb">Assurance</div></div>
+<div class="srvItem" onclick="show('categorie','location_vehicule')"><div class="srvIc">🚙</div><div class="srvLb">Vehicules</div></div>
+<div class="srvItem" onclick="show('categorie','immobilier')"><div class="srvIc">🏠</div><div class="srvLb">Maisons</div></div>
+<div class="srvItem" onclick="show('categorie','logistique')"><div class="srvIc">🚛</div><div class="srvLb">Logistique</div></div>
 <div class="srvItem" onclick="show('categorie','resto')"><div class="srvIc">🍽️</div><div class="srvLb">Restos</div></div>
 <div class="srvItem" onclick="show('categorie','hotel')"><div class="srvIc">🏨</div><div class="srvLb">Hotels</div></div>
 <div class="srvItem" onclick="show('categorie','avion')"><div class="srvIc">✈️</div><div class="srvLb">Vols</div></div>
@@ -278,7 +304,6 @@ h1{font-size:26px;font-weight:800}
 <div class="srvItem" onclick="show('categorie','bar')"><div class="srvIc">🍺</div><div class="srvLb">Bars</div></div>
 <div class="srvItem" onclick="show('categorie','organisateur')"><div class="srvIc">🎪</div><div class="srvLb">Events</div></div>
 <div class="srvItem" onclick="show('categorie','animateur')"><div class="srvIc">🎤</div><div class="srvLb">Animateurs</div></div>
-<div class="srvItem" onclick="show('categorie','groupe')"><div class="srvIc">🥁</div><div class="srvLb">Groupes</div></div>
 <div class="srvItem" onclick="show('categorie','banque')"><div class="srvIc">🏦</div><div class="srvLb">Banque</div></div>
 <div class="srvItem" onclick="show('categorie','magasin')"><div class="srvIc">🏪</div><div class="srvLb">Magasin</div></div>
 <div class="srvItem" onclick="show('categorie','salon')"><div class="srvIc">💇</div><div class="srvLb">Salon</div></div>
@@ -480,13 +505,12 @@ h1{font-size:26px;font-weight:800}
 <div class="hd"><button class="bk" onclick="show('colis')">&#8592;</button><h1>Suivi GPS colis</h1></div>
 <div class="card">
 <div class="fw">Activer le suivi GPS</div>
-<div class="cs">Le suivi GPS permet de localiser votre colis en temps reel et d'informer le livreur de votre position exacte.</div>
+<div class="cs">Le suivi GPS permet de localiser votre colis en temps reel.</div>
 <button class="btn btnG mt" onclick="activerGPS()">📍 Activer mon GPS</button>
 <div class="cs mt" id="gpsStatus">GPS desactive</div>
 </div>
 <div class="card">
 <div class="fw">Appeler le livreur</div>
-<div class="cs">Pour confirmer la commande ou donner des instructions</div>
 <button class="btn btnY mt" onclick="appelerLivreur()">📞 Appeler le livreur</button>
 </div>
 <button class="backBtn" onclick="show('colis')">&#8592; Retour</button>
@@ -573,6 +597,12 @@ setInterval(nextHero,4000);
 var ROLES={
 client:{nom:'Client / Voyageur',ic:'🧳',type:'client'},
 recrutement:{nom:'Recrutement / Emploi',ic:'💼',type:'vendeur'},
+universite:{nom:'Universite & Ecole',ic:'🎓',type:'vendeur'},
+sante:{nom:'Centre de sante',ic:'🏥',type:'vendeur'},
+assurance:{nom:'Assurance',ic:'🛡️',type:'vendeur'},
+location_vehicule:{nom:'Location & vente vehicules',ic:'🚙',type:'vendeur'},
+immobilier:{nom:'Location & vente maisons',ic:'🏠',type:'vendeur'},
+logistique:{nom:'Logistique & transport',ic:'🚛',type:'vendeur'},
 resto:{nom:'Restaurant',ic:'🍽️',type:'vendeur'},
 hotel:{nom:'Hotel / Motel',ic:'🏨',type:'vendeur'},
 magasin:{nom:'Magasin',ic:'🏪',type:'vendeur'},
@@ -599,102 +629,49 @@ aeroport:{nom:'Aeroport',ic:'🛫',type:'vendeur'},
 autre:{nom:'Autre service',ic:'🛠️',type:'vendeur'}
 };
 
-/* ============================================================
-   PROGRAMMES DE VOYAGE DETAILLES
-   ============================================================ */
 var PROGRAMMES={
-  train: {
-    nom:"Setrag - Transgabonais",
-    tel:"1330",
-    email:"c.communication@setrag.com",
-    duree:"12 a 16 heures",
-    distance:"648 km",
-    gares:["Owendo","Ntoum","M'Bel","Ndjole","Alembe","Lope","Booue","Lastoursville","Moanda","Franceville"],
-    owendoVersFranceville:[
-      {jour:"Mardi",heure:"20:00",train:"Train 211 (Express)",type:"express"},
-      {jour:"Jeudi",heure:"13:30",train:"Train 433 (Omnibus)",type:"omnibus"},
-      {jour:"Vendredi",heure:"20:00",train:"Train 511 (Omnibus)",type:"omnibus"},
-      {jour:"Dimanche",heure:"13:30",train:"Train 733 (Omnibus)",type:"omnibus"}
-    ],
-    francevilleVersOwendo:[
-      {jour:"Mardi",heure:"20:00",train:"Train 230 (Omnibus)",type:"omnibus"},
-      {jour:"Jeudi",heure:"13:30",train:"Train 410 (Express)",type:"express"},
-      {jour:"Vendredi",heure:"20:00",train:"Train 530 (Omnibus)",type:"omnibus"},
-      {jour:"Dimanche",heure:"13:30",train:"Train 710 (Express)",type:"express"}
-    ],
-    classes:[
-      {nom:"Seconde classe",prix:"10.000 FCFA",desc:"Sieges rembourres, climatisation"},
-      {nom:"Premiere classe",prix:"15.000 FCFA",desc:"Sieges inclinables, climatisation, repos"},
-      {nom:"Voiture-lit / Couchette",prix:"25.000 FCFA",desc:"Lit pour voyage de nuit"}
-    ]
-  },
-  flygabon: {
-    nom:"Fly Gabon",
-    tel:"+241 06 05 66 49",
-    email:"contact@flygabon.ga",
-    note:"Compagnie nationale gabonaise. Flotte : ATR 72, Airbus A320",
-    vols:[
-      {from:"Libreville (LBV)",to:"Port-Gentil (POG)",duree:"35 min",prix:"45.000 FCFA",freq:"Quotidien"},
-      {from:"Libreville (LBV)",to:"Franceville (MVB)",duree:"1h 10",prix:"55.000 FCFA",freq:"Quotidien"},
-      {from:"Libreville (LBV)",to:"Oyem (OYE)",duree:"1h 00",prix:"50.000 FCFA",freq:"Quotidien"},
-      {from:"Libreville (LBV)",to:"Johannesburg (JNB)",duree:"4h 15",prix:"~350.000 FCFA",freq:"Mardi & Vendredi",vol:"J7 630"},
-      {from:"Johannesburg (JNB)",to:"Libreville (LBV)",duree:"4h 15",prix:"~350.000 FCFA",freq:"Mercredi & Dimanche",vol:"J7 631"}
-    ]
-  },
-  airfrance: {
-    nom:"Air France",
-    tel:"+241 01 44 21 71",
-    email:"contact@airfrance.ga",
-    note:"Reduction a 3 vols directs par semaine a partir d'octobre 2025",
-    vols:[
-      {from:"Libreville (LBV)",to:"Paris (CDG)",duree:"7h 35",prix:"850.000 FCFA",freq:"Quotidien (3 directs/semaine des oct. 2025)",depart:"21:30",arrivee:"06:05 (+1)"},
-      {from:"Paris (CDG)",to:"Libreville (LBV)",duree:"7h 35",prix:"850.000 FCFA",freq:"Quotidien (3 directs/semaine des oct. 2025)",depart:"13:30",arrivee:"20:25"}
-    ]
-  },
-  logimar: {
-    nom:"Logimar 241 (Victoria Jet)",
-    tel:"+241 65 95 90 15",
-    email:"contact@logimar.ga",
-    navire:"Victoria Jet (catamaran)",
-    duree:"3 heures",
-    departs:[
-      {jour:"Lundi",lbv:"12:30",pog:"08:30"},
-      {jour:"Mardi",lbv:"12:30",pog:"08:30"},
-      {jour:"Vendredi",lbv:"10:45",pog:"11:00"},
-      {jour:"Samedi",lbv:"12:30",pog:"08:30"},
-      {jour:"Dimanche",lbv:"10:45",pog:"11:00"}
-    ],
-    classes:[
-      {nom:"Economique",prix:"28.000 FCFA",desc:"Climatisation, sieges standard"},
-      {nom:"Affaires",prix:"50.000 FCFA",desc:"Salon VIP, sieges inclinables, refreshments"}
-    ]
-  },
-  cnii: {
-    nom:"CNII",
-    tel:"+241 44 58 37",
-    email:"contact@cnii.ga",
-    navires:["Ntchengue Express","Gamba"],
-    duree:"3h 30 a 8h",
-    frequence:"1 depart par jour sauf dimanche",
-    note:"Departs selon les marees. Se renseigner au guichet Port-Mole Libreville."
-  },
-  ngv: {
-    nom:"NGV Gabon",
-    tel:"+241 11 79 00 00",
-    email:"contact@ngvlines.ga",
-    navires:["Dolphin","Maria Galanta"],
-    duree:"2h 45 a 3h 45",
-    frequence:"3 a 4 fois par semaine",
-    note:"Standards internationaux. Reservation en ligne sur ngvlines.ga"
-  }
+  train:{nom:"Setrag - Transgabonais",tel:"1330",email:"c.communication@setrag.com",duree:"12 a 16 heures",distance:"648 km",gares:["Owendo","Ntoum","M'Bel","Ndjole","Alembe","Lope","Booue","Lastoursville","Moanda","Franceville"],owendoVersFranceville:[{jour:"Mardi",heure:"20:00",train:"Train 211 (Express)",type:"express"},{jour:"Jeudi",heure:"13:30",train:"Train 433 (Omnibus)",type:"omnibus"},{jour:"Vendredi",heure:"20:00",train:"Train 511 (Omnibus)",type:"omnibus"},{jour:"Dimanche",heure:"13:30",train:"Train 733 (Omnibus)",type:"omnibus"}],francevilleVersOwendo:[{jour:"Mardi",heure:"20:00",train:"Train 230 (Omnibus)",type:"omnibus"},{jour:"Jeudi",heure:"13:30",train:"Train 410 (Express)",type:"express"},{jour:"Vendredi",heure:"20:00",train:"Train 530 (Omnibus)",type:"omnibus"},{jour:"Dimanche",heure:"13:30",train:"Train 710 (Express)",type:"express"}],classes:[{nom:"Seconde classe",prix:"10.000 FCFA",desc:"Sieges rembourres, climatisation"},{nom:"Premiere classe",prix:"15.000 FCFA",desc:"Sieges inclinables, climatisation"},{nom:"Voiture-lit / Couchette",prix:"25.000 FCFA",desc:"Lit pour voyage de nuit"}]},
+  flygabon:{nom:"Fly Gabon",tel:"+241 06 05 66 49",email:"contact@flygabon.ga",note:"Compagnie nationale gabonaise. Flotte : ATR 72, Airbus A320",vols:[{from:"Libreville (LBV)",to:"Port-Gentil (POG)",duree:"35 min",prix:"45.000 FCFA",freq:"Quotidien"},{from:"Libreville (LBV)",to:"Franceville (MVB)",duree:"1h 10",prix:"55.000 FCFA",freq:"Quotidien"},{from:"Libreville (LBV)",to:"Oyem (OYE)",duree:"1h 00",prix:"50.000 FCFA",freq:"Quotidien"},{from:"Libreville (LBV)",to:"Johannesburg (JNB)",duree:"4h 15",prix:"~350.000 FCFA",freq:"Mardi & Vendredi",vol:"J7 630"},{from:"Johannesburg (JNB)",to:"Libreville (LBV)",duree:"4h 15",prix:"~350.000 FCFA",freq:"Mercredi & Dimanche",vol:"J7 631"}]},
+  airfrance:{nom:"Air France",tel:"+241 01 44 21 71",email:"contact@airfrance.ga",note:"Reduction a 3 vols directs par semaine a partir d'octobre 2025",vols:[{from:"Libreville (LBV)",to:"Paris (CDG)",duree:"7h 35",prix:"850.000 FCFA",freq:"Quotidien (3 directs/semaine des oct. 2025)",depart:"21:30",arrivee:"06:05 (+1)"},{from:"Paris (CDG)",to:"Libreville (LBV)",duree:"7h 35",prix:"850.000 FCFA",freq:"Quotidien (3 directs/semaine des oct. 2025)",depart:"13:30",arrivee:"20:25"}]},
+  logimar:{nom:"Logimar 241 (Victoria Jet)",tel:"+241 65 95 90 15",email:"contact@logimar.ga",navire:"Victoria Jet (catamaran)",duree:"3 heures",departs:[{jour:"Lundi",lbv:"12:30",pog:"08:30"},{jour:"Mardi",lbv:"12:30",pog:"08:30"},{jour:"Vendredi",lbv:"10:45",pog:"11:00"},{jour:"Samedi",lbv:"12:30",pog:"08:30"},{jour:"Dimanche",lbv:"10:45",pog:"11:00"}],classes:[{nom:"Economique",prix:"28.000 FCFA",desc:"Climatisation, sieges standard"},{nom:"Affaires",prix:"50.000 FCFA",desc:"Salon VIP, sieges inclinables"}]},
+  cnii:{nom:"CNII",tel:"+241 44 58 37",email:"contact@cnii.ga",navires:["Ntchengue Express","Gamba"],duree:"3h 30 a 8h",frequence:"1 depart par jour sauf dimanche",note:"Departs selon les marees."},
+  ngv:{nom:"NGV Gabon",tel:"+241 11 79 00 00",email:"contact@ngvlines.ga",navires:["Dolphin","Maria Galanta"],duree:"2h 45 a 3h 45",frequence:"3 a 4 fois par semaine",note:"Standards internationaux. Reservation en ligne sur ngvlines.ga"}
 };
 
 var DEMO_VENDEURS=[
-{id:'job1',categorie:'recrutement',nom:"BGFI Bank recrute",ville:"Libreville",quartier:"Centre",tel:"+241 01 76 33 33",email:"recrutement@bgfi.com",prix:"Selon profil",desc:"La BGFI Bank recrute pour plusieurs postes.",photo:"https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=600",articles:[{nom:"Charge de clientele",prix:0,desc:"CDI - Bac+3 - Experience 2 ans - Libreville"},{nom:"Analyste credit",prix:0,desc:"CDI - Master Finance - Libreville"},{nom:"Developpeur informatique",prix:0,desc:"CDI - Bac+3 Info - Libreville"}]},
-{id:'job2',categorie:'recrutement',nom:"Total Energies recrute",ville:"Port-Gentil",quartier:"Centre",tel:"+241 01 55 44 33",email:"recrutement@total.ga",prix:"Selon profil",desc:"Total Energies Gabon recrute des techniciens petroliers.",photo:"https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=600",articles:[{nom:"Technicien petrolier",prix:0,desc:"CDI - Bac+2 - Port-Gentil"},{nom:"Ingenieur HSE",prix:0,desc:"CDI - Master HSE - Port-Gentil"}]},
-{id:'job3',categorie:'recrutement',nom:"Hotel Radisson Blu recrute",ville:"Libreville",quartier:"Boulevard de Nice",tel:"+241 11 44 80 00",email:"rh@radisson.ga",prix:"Selon profil",desc:"Le Radisson Blu recrute dans le secteur hotellerie.",photo:"https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600",articles:[{nom:"Receptionniste",prix:0,desc:"CDI - Anglais courant"},{nom:"Serveur / Serveuse",prix:0,desc:"CDI - Experience restaurant"},{nom:"Cuisinier",prix:0,desc:"CDI - Experience gastronomie"}]},
-{id:'job4',categorie:'recrutement',nom:"Fly Gabon recrute",ville:"Libreville",quartier:"Aeroport",tel:"+241 06 05 66 49",email:"rh@flygabon.ga",prix:"Selon profil",desc:"Fly Gabon recrute du personnel navigant et au sol.",photo:"https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=600",articles:[{nom:"Hotesse de l air / Steward",prix:0,desc:"CDI - Formation assuree"},{nom:"Pilote de ligne",prix:0,desc:"CDI - Licence ATPL"}]},
-{id:'job5',categorie:'recrutement',nom:"Setrag recrute",ville:"Owendo",quartier:"Gare",tel:"1330",email:"recrutement@setrag.com",prix:"Selon profil",desc:"La Setrag recrute des conducteurs de train.",photo:"https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=600",articles:[{nom:"Conducteur de train",prix:0,desc:"CDI - Formation assuree"},{nom:"Agent securite ferroviaire",prix:0,desc:"CDI - Owendo / Franceville"}]},
+/* RECRUTEMENT */
+{id:'job1',categorie:'recrutement',nom:"BGFI Bank recrute",ville:"Libreville",quartier:"Centre",tel:"+241 01 76 33 33",email:"recrutement@bgfi.com",prix:"Selon profil",desc:"La BGFI Bank recrute pour plusieurs postes.",photo:"https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=600",articles:[{nom:"Charge de clientele",prix:0,desc:"CDI - Bac+3 - Libreville"},{nom:"Analyste credit",prix:0,desc:"CDI - Master Finance"},{nom:"Developpeur informatique",prix:0,desc:"CDI - Bac+3 Info"}]},
+{id:'job2',categorie:'recrutement',nom:"Total Energies recrute",ville:"Port-Gentil",quartier:"Centre",tel:"+241 01 55 44 33",email:"recrutement@total.ga",prix:"Selon profil",desc:"Techniciens petroliers et ingenieurs HSE.",photo:"https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=600",articles:[{nom:"Technicien petrolier",prix:0,desc:"CDI - Bac+2"},{nom:"Ingenieur HSE",prix:0,desc:"CDI - Master HSE"}]},
+{id:'job3',categorie:'recrutement',nom:"Radisson Blu recrute",ville:"Libreville",quartier:"Boulevard de Nice",tel:"+241 11 44 80 00",email:"rh@radisson.ga",prix:"Selon profil",desc:"Secteur hotellerie.",photo:"https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600",articles:[{nom:"Receptionniste",prix:0,desc:"CDI - Anglais courant"},{nom:"Serveur",prix:0,desc:"CDI"},{nom:"Cuisinier",prix:0,desc:"CDI"}]},
+{id:'job4',categorie:'recrutement',nom:"Fly Gabon recrute",ville:"Libreville",quartier:"Aeroport",tel:"+241 06 05 66 49",email:"rh@flygabon.ga",prix:"Selon profil",desc:"Personnel navigant et au sol.",photo:"https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=600",articles:[{nom:"Hotesse de l air / Steward",prix:0,desc:"CDI - Formation assuree"},{nom:"Pilote de ligne",prix:0,desc:"CDI - Licence ATPL"}]},
+{id:'job5',categorie:'recrutement',nom:"Setrag recrute",ville:"Owendo",quartier:"Gare",tel:"1330",email:"recrutement@setrag.com",prix:"Selon profil",desc:"Conducteurs de train et agents.",photo:"https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=600",articles:[{nom:"Conducteur de train",prix:0,desc:"CDI - Formation assuree"},{nom:"Agent securite ferroviaire",prix:0,desc:"CDI"}]},
+/* UNIVERSITE & ECOLE */
+{id:'univ1',categorie:'universite',nom:"Universite Omar Bongo",ville:"Libreville",quartier:"Boulevard",tel:"+241 01 76 25 06",email:"contact@uob.ga",prix:"Frais selon filiere",desc:"Principale universite publique du Gabon. Facultes : Droit, Lettres, Sciences, Economie.",photo:"https://images.unsplash.com/photo-1562774053-701939374585?w=600",articles:[{nom:"Faculte de Droit",prix:0,desc:"Licence / Master - inscriptions ouvertes"},{nom:"Faculte des Lettres",prix:0,desc:"Licence / Master"},{nom:"Faculte des Sciences",prix:0,desc:"Licence / Master"}]},
+{id:'univ2',categorie:'universite',nom:"Universite des Sciences et Techniques de Masuku",ville:"Franceville",quartier:"Campus",tel:"+241 01 67 71 29",email:"contact@ustm.ga",prix:"Frais selon filiere",desc:"Universite scientifique et technique du Gabon. Genie, Biologie, Geologie.",photo:"https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?w=600",articles:[{nom:"Genie civil",prix:0,desc:"Licence / Master"},{nom:"Genie petrolier",prix:0,desc:"Licence / Master"},{nom:"Biologie",prix:0,desc:"Licence / Master"}]},
+{id:'univ3',categorie:'universite',nom:"Institut National des Sciences de Gestion",ville:"Libreville",quartier:"Centre",tel:"+241 01 76 30 00",email:"contact@insg.ga",prix:"Frais selon filiere",desc:"Formation en gestion, comptabilite, commerce, informatique de gestion.",photo:"https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=600",articles:[{nom:"Comptabilite",prix:0,desc:"BTS / Licence"},{nom:"Commerce international",prix:0,desc:"Licence"},{nom:"Informatique de gestion",prix:0,desc:"BTS / Licence"}]},
+{id:'univ4',categorie:'universite',nom:"Lycee Blaise Pascal",ville:"Libreville",quartier:"Centre",tel:"+241 01 76 22 11",email:"contact@lyceeblaise.ga",prix:"Frais scolaires",desc:"Lycee d'excellence. Series A, C, D et Technique.",photo:"https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=600",articles:[{nom:"Serie C (Maths-Physique)",prix:0,desc:"Bac scientifique"},{nom:"Serie D (Sciences)",prix:0,desc:"Bac scientifique"}]},
+/* SANTE */
+{id:'sante1',categorie:'sante',nom:"CHU de Libreville",ville:"Libreville",quartier:"Centre",tel:"+241 01 76 22 00",email:"contact@chul.ga",prix:"Consultations",desc:"Centre Hospitalier Universitaire de Libreville. Urgences 24h/24, maternite, pediatrie, chirurgie.",photo:"https://images.unsplash.com/photo-1538108149393-fbbd81895907?w=600",articles:[{nom:"Consultation generale",prix:5000,desc:"Medecine generale"},{nom:"Pediatrie",prix:8000,desc:"Enfants"},{nom:"Urgences 24/24",prix:0,desc:"Service d urgence"}]},
+{id:'sante2',categorie:'sante',nom:"Polyclinique El Rapha",ville:"Libreville",quartier:"Louis",tel:"+241 01 76 44 55",email:"contact@elrapha.ga",prix:"Consultations",desc:"Clinique privee. Consultations, hospitalisation, imagerie, laboratoire.",photo:"https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=600",articles:[{nom:"Consultation specialiste",prix:20000,desc:"Sur rendez-vous"},{nom:"Hospitalisation",prix:50000,desc:"Par jour"}]},
+{id:'sante3',categorie:'sante',nom:"Pharmacie du Centre",ville:"Libreville",quartier:"Centre",tel:"+241 01 76 33 22",email:"contact@pharmaciecentre.ga",prix:"Selon medicament",desc:"Pharmacie de garde, medicaments, parapharmacie.",photo:"https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=600",articles:[]},
+{id:'sante4',categorie:'sante',nom:"Laboratoire Bio Sante",ville:"Libreville",quartier:"Glass",tel:"+241 01 44 22 33",email:"contact@biosante.ga",prix:"Analyses",desc:"Analyses medicales, bilans sanguins, depistages.",photo:"https://images.unsplash.com/photo-1579154204601-01588f351e67?w=600",articles:[{nom:"Bilan sanguin complet",prix:25000,desc:"Analyse complete"},{nom:"Test paludisme",prix:5000,desc:"Depistage rapide"}]},
+/* ASSURANCE */
+{id:'assur1',categorie:'assurance',nom:"AXA Assurances Gabon",ville:"Libreville",quartier:"Centre",tel:"+241 01 76 30 30",email:"contact@axa.ga",prix:"Selon contrat",desc:"Assurance auto, habitation, sante, vie, voyage, entreprise.",photo:"https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=600",articles:[{nom:"Assurance auto tous risques",prix:0,desc:"Sur devis"},{nom:"Assurance sante famille",prix:0,desc:"Couverture famille"},{nom:"Assurance voyage",prix:0,desc:"Pour voyages internationaux"}]},
+{id:'assur2',categorie:'assurance',nom:"OGAR Assurances",ville:"Libreville",quartier:"Centre",tel:"+241 01 76 33 00",email:"contact@ogar.ga",prix:"Selon contrat",desc:"Assurances IARD et vie. Plus ancienne compagnie d'assurance du Gabon.",photo:"https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=600",articles:[{nom:"Assurance auto",prix:0,desc:"Tous types de vehicules"},{nom:"Assurance multirisque",prix:0,desc:"Habitation, commerce"}]},
+{id:'assur3',categorie:'assurance',nom:"SUNU Assurances",ville:"Libreville",quartier:"Boulevard",tel:"+241 01 76 44 00",email:"contact@sunu.ga",prix:"Selon contrat",desc:"Groupe panafricain. Assurances vie et non-vie.",photo:"https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600",articles:[{nom:"Assurance vie",prix:0,desc:"Epargne et prevoyance"},{nom:"Assurance non-vie",prix:0,desc:"Auto, habitation, entreprise"}]},
+/* LOCATION VEHICULES */
+{id:'locveh1',categorie:'location_vehicule',nom:"Libreville Rent a Car",ville:"Libreville",quartier:"Centre",tel:"+241 01 44 55 66",email:"contact@librerenta.ga",prix:"A partir de 25.000 F/jour",desc:"Location de vehicules : berlines, 4x4, minibus avec ou sans chauffeur.",photo:"https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=600",articles:[{nom:"Berline (Toyota Corolla)",prix:25000,desc:"Par jour - carburant non inclus"},{nom:"SUV (Toyota Prado)",prix:60000,desc:"Par jour - parfait pour voyage"},{nom:"Minibus (8 places)",prix:80000,desc:"Par jour avec chauffeur"}]},
+{id:'locveh2',categorie:'location_vehicule',nom:"Gabon Auto Vente",ville:"Libreville",quartier:"Glass",tel:"+241 01 55 44 33",email:"contact@galoto.ga",prix:"Selon modele",desc:"Vente de vehicules neufs et occasion. Toyota, Nissan, Hyundai.",photo:"https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=600",articles:[{nom:"Toyota Corolla - Neuf",prix:0,desc:"Sur devis - garantie"},{nom:"Nissan X-Trail - Occasion",prix:0,desc:"Vehicule verifie"},{nom:"Hyundai Tucson - Neuf",prix:0,desc:"Sur devis"}]},
+{id:'locveh3',categorie:'location_vehicule',nom:"Prestige Cars Gabon",ville:"Libreville",quartier:"Louis",tel:"+241 66 44 33 22",email:"contact@prestigecars.ga",prix:"Sur devis",desc:"Location de vehicules de luxe avec chauffeur. Mercedes, BMW, Audi.",photo:"https://images.unsplash.com/photo-1502877338535-766e1452684a?w=600",articles:[{nom:"Mercedes Classe E",prix:0,desc:"Avec chauffeur - sur devis"},{nom:"BMW Serie 5",prix:0,desc:"Avec chauffeur - sur devis"}]},
+/* IMMOBILIER */
+{id:'immo1',categorie:'immobilier',nom:"Agence Nzeng Immobilier",ville:"Libreville",quartier:"Nzeng-Ayong",tel:"+241 74 55 66 77",email:"contact@nzengimmo.ga",prix:"Selon bien",desc:"Location et vente de maisons, appartements, villas, terrains.",photo:"https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=600",articles:[{nom:"Appartement 2 chambres - Location",prix:150000,desc:"Par mois - Libreville Centre"},{nom:"Villa 4 chambres - Location",prix:450000,desc:"Par mois - Nzeng-Ayong"},{nom:"Terrain 500m2 - Vente",prix:0,desc:"Sur devis - Akanda"}]},
+{id:'immo2',categorie:'immobilier',nom:"Gabon Properties",ville:"Libreville",quartier:"Glass",tel:"+241 62 11 22 33",email:"contact@gabonprop.ga",prix:"Selon bien",desc:"Agence immobiliere. Achat, vente, location, gestion locative.",photo:"https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=600",articles:[{nom:"Studio meuble - Location",prix:80000,desc:"Par mois - Louis"},{nom:"Villa piscine - Vente",prix:0,desc:"Sur devis - Sabliere"}]},
+{id:'immo3',categorie:'immobilier',nom:"Residence Les Palmiers",ville:"Libreville",quartier:"Sabliere",tel:"+241 66 55 44 33",email:"contact@respalmiers.ga",prix:"A partir de 200.000 F/mois",desc:"Residence moderne. Appartements et villas meubles.",photo:"https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600",articles:[{nom:"Appartement 3 chambres",prix:200000,desc:"Par mois - meuble"},{nom:"Villa 5 chambres",prix:600000,desc:"Par mois - meublee"}]},
+/* LOGISTIQUE */
+{id:'logi1',categorie:'logistique',nom:"Bollore Logistics Gabon",ville:"Libreville",quartier:"Owendo",tel:"+241 01 55 44 33",email:"contact@bollore.ga",prix:"Sur devis",desc:"Logistique globale, transport international, entreposage, douane.",photo:"https://images.unsplash.com/photo-1566576721346-d4a3b4eaeb55?w=600",articles:[{nom:"Transport maritime",prix:0,desc:"Conteneurs, groupage"},{nom:"Entreposage",prix:0,desc:"Stockage securise"},{nom:"Douane & transit",prix:0,desc:"Dedouanement"}]},
+{id:'logi2',categorie:'logistique',nom:"SDV Gabon",ville:"Libreville",quartier:"Port",tel:"+241 01 44 22 11",email:"contact@sdv.ga",prix:"Sur devis",desc:"Transport et logistique. Commissionnaire agreé en douane.",photo:"https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?w=600",articles:[{nom:"Transport terrestre",prix:0,desc:"Camions, semi-remorques"},{nom:"Fret aerien",prix:0,desc:"Transport urgent"}]},
+{id:'logi3',categorie:'logistique',nom:"Gabon Cargo Express",ville:"Libreville",quartier:"Owendo",tel:"+241 74 33 22 11",email:"contact@gaboncargo.ga",prix:"Selon poids",desc:"Transport de marchandises, colis volumineux, demenagement.",photo:"https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600",articles:[{nom:"Transport de colis",prix:0,desc:"Selon poids et distance"},{nom:"Demenagement",prix:0,desc:"Sur devis"}]},
+/* EXISTANTS */
 {id:'shalom1',categorie:'bus',nom:"SHALOM TRANSPORT",ville:"Libreville",quartier:"PK5, Ancienne station",tel:"+241 62 898 412 / +241 60 098 927",email:"contact@shalomtransport.ga",prix:"8.000 - 15.000 FCFA",desc:"Voyagez en toute securite, arrivez a bon port.",photo:"https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600",articles:[{nom:"Libreville - Lambarene",prix:8000,desc:"Depart PK5"},{nom:"Libreville - Mouila",prix:10000,desc:"Depart PK5"},{nom:"Libreville - Ndende",prix:15000,desc:"Depart PK5"},{nom:"Libreville - Lebamba",prix:15000,desc:"Depart PK5"}]},
 {id:'boonia1',categorie:'taxi',nom:"BOONIA VTC",ville:"Libreville",quartier:"Toute la ville",tel:"",email:"contact@boonia.ga",prix:"Tarif fixe",desc:"Partenariat PNPE-Boonia. 60 vehicules neufs.",photo:"https://images.unsplash.com/photo-1502877338535-766e1452684a?w=600",articles:[{nom:"Libreville - Toutes destinations",prix:0,desc:"Akanda, Owendo, Ntoum"}]},
 {id:'taxigab1',categorie:'taxi',nom:"TAXI GAB",ville:"Libreville",quartier:"Toute la ville",tel:"",email:"taxigabpnpeselection2@gmail.com",prix:"500 F - 2.000 F",desc:"Programme national lance le 9 octobre 2024.",photo:"https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600",articles:[{nom:"Libreville - Mbolo",prix:500,desc:"Course classique"},{nom:"Libreville - Aeroport",prix:2000,desc:"Tarif aeroport"}]},
@@ -742,7 +719,6 @@ var candidatures=load('candidatures',[]);
 var map=null,mapLayer=null;
 var gpsWatch=null,gpsActive=false;
 var currentJob=null;
-var currentProgramme=null;
 
 function uploadImage(input,hiddenId,previewId,isAvatar){
 var file=input.files[0];if(!file)return;
@@ -866,7 +842,7 @@ function renderHomeJobs(){
 var box=document.getElementById('homeJobs');
 if(!box)return;
 var jobs=vendeurs.filter(function(v){return v.categorie==='recrutement';});
-if(jobs.length===0){box.innerHTML='<div class="emp"><span class="ic">💼</span><div>Aucune offre pour le moment</div></div>';return;}
+if(jobs.length===0){box.innerHTML='<div class="emp"><span class="ic">💼</span><div>Aucune offre</div></div>';return;}
 var h='';
 jobs.slice(0,3).forEach(function(j){h+=cardJob(j);});
 h+='<button class="btn btnB mt" onclick="show(\'categorie\',\'recrutement\')">Voir toutes les offres ('+jobs.length+')</button>';
@@ -951,7 +927,7 @@ if(!v.tel&&!v.email){contactHtml+='<button class="btn btnO btnSm" style="flex:1"
 return '<div class="imgCard" onclick="openVendeur(\''+v.id+'\')"><div class="im" style="background-image:url(\''+(v.photo||'')+'\')"></div><div class="bd"><div class="tt">'+r.ic+' '+v.nom+'</div><div class="mt2">📍 '+v.ville+(v.quartier?' - '+v.quartier:'')+'</div><div class="mt2">'+r.nom+'</div>'+(v.prix?'<div class="mt2" style="color:#FCD116;font-weight:700">'+v.prix+'</div>':'')+'<div style="display:flex;gap:8px;margin-top:10px">'+contactHtml+'</div></div></div>';
 }
 
-var CAT_LABELS={recrutement:'💼 Offres d emploi',resto:'🍽️ Restaurants',hotel:'🏨 Hotels',avion:'✈️ Vols',bateau:'🚢 Bateaux',train:'🚆 Train',bus:'🚌 Bus',taxi:'🚕 Taxi / VTC',livreur:'📦 Livraison',chaise:'🪑 Location chaise',hotesse:'👩‍💼 Hotesses',traiteur:'🍲 Traiteurs',tourisme:'🌍 Tourisme',divertissement:'🎢 Loisirs',bar:'🍺 Bars',organisateur:'🎪 Organisateurs',animateur:'🎤 Animateurs',groupe:'🥁 Groupes',boite:'🎵 Boites de nuit',banque:'🏦 Banques',magasin:'🏪 Magasins',salon:'💇 Salons',snack:'☕ Snacks',aeroport:'🛫 Aeroports',autre:'🛠️ Autres'};
+var CAT_LABELS={recrutement:'💼 Offres d emploi',universite:'🎓 Universites & Ecoles',sante:'🏥 Centres de sante',assurance:'🛡️ Assurances',location_vehicule:'🚙 Location & vente vehicules',immobilier:'🏠 Location & vente maisons',logistique:'🚛 Logistique & transport',resto:'🍽️ Restaurants',hotel:'🏨 Hotels',avion:'✈️ Vols',bateau:'🚢 Bateaux',train:'🚆 Train',bus:'🚌 Bus',taxi:'🚕 Taxi / VTC',livreur:'📦 Livraison',chaise:'🪑 Location chaise',hotesse:'👩‍💼 Hotesses',traiteur:'🍲 Traiteurs',tourisme:'🌍 Tourisme',divertissement:'🎢 Loisirs',bar:'🍺 Bars',organisateur:'🎪 Organisateurs',animateur:'🎤 Animateurs',groupe:'🥁 Groupes',boite:'🎵 Boites de nuit',banque:'🏦 Banques',magasin:'🏪 Magasins',salon:'💇 Salons',snack:'☕ Snacks',aeroport:'🛫 Aeroports',autre:'🛠️ Autres'};
 
 function renderCategorie(cat){
 if(!cat){cat='resto';}
@@ -961,33 +937,22 @@ var h='';
 if(res.length===0)h='<div class="emp"><span class="ic">'+((ROLES[cat]&&ROLES[cat].ic)||'📌')+'</span><div class="tt">Aucune offre</div></div>';
 else{
 if(cat==='recrutement'){
-h+='<div class="jobBanner"><div class="fw">💼 '+res.length+' recruteur(s)</div><div class="cs" style="color:#E2E8F0">Trouvez votre prochain emploi ou stage</div></div>';
+h+='<div class="jobBanner"><div class="fw">💼 '+res.length+' recruteur(s)</div><div class="cs" style="color:#E2E8F0">Trouvez votre prochain emploi</div></div>';
 res.forEach(function(v){h+=cardJob(v);});
 }
-else if(cat==='train'){
-h+=renderProgrammeTrain();
-}
-else if(cat==='avion'){
-h+=renderProgrammeAvion();
-}
-else if(cat==='bateau'){
-h+=renderProgrammeBateau();
-}
-else{
-res.forEach(function(v){h+=cardVendeur(v);});
-}
+else if(cat==='train'){h+=renderProgrammeTrain();}
+else if(cat==='avion'){h+=renderProgrammeAvion();}
+else if(cat==='bateau'){h+=renderProgrammeBateau();}
+else{res.forEach(function(v){h+=cardVendeur(v);});}
 }
 document.getElementById('catList').innerHTML=h;
 }
 
-/* ============================================================
-   RENDU DES PROGRAMMES DE VOYAGE
-   ============================================================ */
 function renderProgrammeTrain(){
 var p=PROGRAMMES.train;
 var h='';
 h+='<div class="infoBox"><div class="fw">🚆 Setrag - Transgabonais</div><div class="cs">Ligne Owendo-Franceville : '+p.distance+'</div><div class="cs">Duree : '+p.duree+'</div><div class="cs">Contact : <a href="tel:1330" style="color:#FCD116;text-decoration:none;font-weight:700">'+p.tel+'</a></div></div>';
-h+='<div class="card"><div class="fw" style="color:#FCD116;margin-bottom:8px">📍 Gares desservies (24 gares)</div><div class="stationList">'+p.gares.map(function(g,i){return '<span class="'+(i===0||i===p.gares.length-1?'main':'')+'">'+g+'</span>'+(i<p.gares.length-1?' → ':'');}).join('')+'</div></div>';
+h+='<div class="card"><div class="fw" style="color:#FCD116;margin-bottom:8px">📍 Gares desservies</div><div class="stationList">'+p.gares.map(function(g,i){return '<span class="'+(i===0||i===p.gares.length-1?'main':'')+'">'+g+'</span>'+(i<p.gares.length-1?' → ':'');}).join('')+'</div></div>';
 h+='<div class="card"><div class="fw" style="color:#FCD116;margin-bottom:8px">🕐 Owendo → Franceville</div>';
 p.owendoVersFranceville.forEach(function(d){
 h+='<div class="progRow"><div class="progDay">'+d.jour+'</div><div class="progInfo"><div>'+d.train+'<span class="progType '+(d.type==='express'?'express':'omnibus')+'">'+d.type.toUpperCase()+'</span></div><div class="trainNum">Depart a '+d.heure+'</div></div></div>';
@@ -1013,7 +978,6 @@ var p1=PROGRAMMES.flygabon;
 var p2=PROGRAMMES.airfrance;
 var h='';
 h+='<div class="jobBanner"><div class="fw">✈️ Compagnies aeriennes</div><div class="cs" style="color:#E2E8F0">Programmes et destinations</div></div>';
-
 h+='<div class="infoBox"><div class="fw">✈️ '+p1.nom+'</div><div class="cs">'+p1.note+'</div><div class="cs">Contact : '+p1.tel+'</div><div class="cs">Email : '+p1.email+'</div></div>';
 h+='<div class="card"><div class="fw" style="color:#FCD116;margin-bottom:8px">🌍 Destinations</div>';
 p1.vols.forEach(function(v){
@@ -1021,7 +985,6 @@ h+='<div style="padding:10px 0;border-bottom:1px solid #1E293B"><div class="row"
 });
 h+='</div>';
 h+='<div class="callBanner"><div class="fw">Reservation Fly Gabon</div><div class="cs" style="color:#fff">'+p1.tel+' / '+p1.email+'</div><button class="btn btnY mt" onclick="window.location.href=\'tel:'+p1.tel.replace(/\s/g,'')+'\'">📞 Appeler</button><button class="btn btnB mt" onclick="window.location.href=\'mailto:'+p1.email+'\'">✉️ Email</button></div>';
-
 h+='<div class="infoBox" style="background:rgba(0,61,165,0.1);border-color:rgba(0,61,165,0.3)"><div class="fw">✈️ '+p2.nom+'</div><div class="cs">'+p2.note+'</div><div class="cs">Contact : '+p2.tel+'</div><div class="cs">Email : '+p2.email+'</div></div>';
 h+='<div class="card"><div class="fw" style="color:#FCD116;margin-bottom:8px">🌍 Destinations</div>';
 p2.vols.forEach(function(v){
@@ -1035,8 +998,7 @@ return h;
 
 function renderProgrammeBateau(){
 var h='';
-h+='<div class="jobBanner"><div class="fw">🚢 Compagnies maritimes</div><div class="cs" style="color:#E2E8F0">Horaires et programmes Libreville ↔ Port-Gentil</div></div>';
-
+h+='<div class="jobBanner"><div class="fw">🚢 Compagnies maritimes</div><div class="cs" style="color:#E2E8F0">Horaires et programmes</div></div>';
 var p=PROGRAMMES.logimar;
 h+='<div class="infoBox"><div class="fw">🚢 '+p.nom+'</div><div class="cs">Navire : '+p.navire+' - Duree : '+p.duree+'</div><div class="cs">Contact : '+p.tel+'</div><div class="cs">Email : '+p.email+'</div></div>';
 h+='<div class="card"><div class="fw" style="color:#FCD116;margin-bottom:8px">🕐 Horaires (Libreville ↔ Port-Gentil)</div>';
@@ -1050,11 +1012,9 @@ h+='<div class="tarifRow"><span>'+c.nom+'</span><span class="prc">'+c.prix+'</sp
 });
 h+='</div>';
 h+='<div class="callBanner"><div class="fw">Reservation Logimar 241</div><div class="cs" style="color:#fff">'+p.tel+'</div><button class="btn btnY mt" onclick="window.location.href=\'tel:'+p.tel.replace(/\s/g,'')+'\'">📞 Appeler</button></div>';
-
 var c=PROGRAMMES.cnii;
 h+='<div class="infoBox" style="background:rgba(0,61,165,0.1);border-color:rgba(0,61,165,0.3)"><div class="fw">🚢 '+c.nom+'</div><div class="cs">Navires : '+c.navires.join(', ')+'</div><div class="cs">Duree : '+c.duree+'</div><div class="cs">'+c.note+'</div><div class="cs">Contact : '+c.tel+'</div></div>';
 h+='<div class="callBanner"><div class="fw">Reservation CNII</div><div class="cs" style="color:#fff">'+c.tel+'</div><button class="btn btnY mt" onclick="window.location.href=\'tel:'+c.tel.replace(/\s/g,'')+'\'">📞 Appeler</button></div>';
-
 var n=PROGRAMMES.ngv;
 h+='<div class="infoBox" style="background:rgba(124,58,237,0.1);border-color:rgba(124,58,237,0.3)"><div class="fw">🚢 '+n.nom+'</div><div class="cs">Navires : '+n.navires.join(', ')+'</div><div class="cs">Duree : '+n.duree+'</div><div class="cs">Frequence : '+n.frequence+'</div><div class="cs">'+n.note+'</div><div class="cs">Contact : '+n.tel+'</div></div>';
 h+='<div class="callBanner"><div class="fw">Reservation NGV</div><div class="cs" style="color:#fff">'+n.tel+'</div><button class="btn btnY mt" onclick="window.location.href=\'tel:'+n.tel.replace(/\s/g,'')+'\'">📞 Appeler</button></div>';
@@ -1098,7 +1058,7 @@ document.getElementById('proTitle').textContent=v?v.nom:'Mon espace';
 document.getElementById('proSub').textContent=r.nom;
 document.getElementById('proAvatar').textContent=(v&&v.nom?v.nom:profil.nom).charAt(0).toUpperCase();
 var h='';
-if(!v){h='<div class="emp"><span class="ic">'+r.ic+'</span><div class="tt">Completez votre fiche</div><div style="margin-top:6px">Ajoutez vos informations pour apparaitre dans les recherches.</div><button class="btn btnG mt" onclick="show(\'proInfo\')">Remplir mes infos</button></div>';}
+if(!v){h='<div class="emp"><span class="ic">'+r.ic+'</span><div class="tt">Completez votre fiche</div><button class="btn btnG mt" onclick="show(\'proInfo\')">Remplir mes infos</button></div>';}
 else{h='<div class="imgCard" style="cursor:default"><div class="im" style="background-image:url(\''+(v.photo||'')+'\')"></div><div class="bd"><div class="fw">'+r.ic+' '+v.nom+'</div><div class="cs">📍 '+v.ville+(v.quartier?' - '+v.quartier:'')+'</div>'+(v.tel?'<div class="cs">📞 '+v.tel+'</div>':'')+(v.email?'<div class="cs">✉️ '+v.email+'</div>':'')+(v.prix?'<div class="cs">💰 '+v.prix+'</div>':'')+'<div class="cs">'+(v.articles||[]).length+' offre(s)</div></div></div>';}
 document.getElementById('proContent').innerHTML=h;
 var oh='';
