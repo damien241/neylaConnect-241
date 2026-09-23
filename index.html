@@ -125,7 +125,10 @@ h1{font-size:26px;font-weight:800}
 .tarifRow{display:flex;justify-content:space-between;padding:8px 0;font-size:13px;border-bottom:1px solid rgba(30,41,59,0.5)}
 .tarifRow:last-child{border-bottom:none}
 .infoBox{background:rgba(0,158,96,0.15);border:1px solid rgba(0,158,96,0.3);border-radius:12px;padding:12px;margin-bottom:12px}
-  .uiBar{position:fixed;top:10px;right:10px;z-index:500;display:flex;gap:6px}
+</style>
+</head>
+<style>
+.uiBar{position:fixed;top:10px;right:10px;z-index:500;display:flex;gap:6px}
 .uiBar button{width:38px;height:38px;border-radius:50%;background:rgba(17,24,39,0.9);border:1px solid #1E293B;color:#fff;font-size:16px;cursor:pointer;font-weight:700}
 .uiBar button:active{background:#1E293B}
 .uiBar button.langBtn{width:auto;padding:0 12px;border-radius:19px;font-size:12px}
@@ -299,8 +302,7 @@ body.light .guestBox{border-top-color:#E2E8F0}
 <button class="btn btnY" onclick="enterAsGuest()">👤 <span data-i18n="guest">Entrer en tant qu invite</span></button>
 </div>
 <div class="foot">Concepteur : <b>Damien (Starly Koumba)</b></div>
-</div>accesskey
-  <div class="page" id="pgHome">
+</div>accesskey<div class="page" id="pgHome">
 <div class="hd">
 <div><h1><span data-i18n="hello">Bonjour</span> <span id="hName">Client</span></h1><p class="sub" id="hCity">Libreville, Gabon</p></div>
 <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#003DA5,#009E60);display:flex;align-items:center;justify-content:center;font-weight:700;border:2px solid #FCD116;margin-left:auto;overflow:hidden" id="hAvatar">U</div>
@@ -389,8 +391,8 @@ body.light .guestBox{border-top-color:#E2E8F0}
 </div>
 <div class="sec">📋 <span data-i18n="orders">Commandes recues</span></div>
 <div id="proOrders"></div>
-</div>accesskey
-  <div class="page" id="pgProInfo">
+</div>
+<div class="page" id="pgProInfo">
 <div class="hd"><button class="bk" onclick="goBack()">&#8592;</button><h1 data-i18n="proInfo">Mes informations</h1></div>
 <label class="lbl" data-i18n="lblEtabName">Nom etablissement</label><input class="inp" id="piNom">
 <label class="lbl" data-i18n="lblDesc">Description</label><input class="inp" id="piDesc">
@@ -602,7 +604,116 @@ body.light .guestBox{border-top-color:#E2E8F0}
 <div class="nav off" id="navbar"></div>
 <div class="toast" id="toast"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
 <script>
+  /* ================= FIREBASE CONFIG ================= */
+var firebaseConfig={
+apiKey:"AIzaSyB_Nxk1ddB_e1lpdkGD4EH_tE8ui6BOTlg",
+authDomain:"neylaconnect241-ec8ae.firebaseapp.com",
+projectId:"neylaconnect241-ec8ae",
+storageBucket:"neylaconnect241-ec8ae.firebasestorage.app",
+messagingSenderId:"811132471773",
+appId:"1:811132471773:web:209f41369c652421574e34",
+measurementId:"G-JBQ379H9HF"
+};
+
+var fbReady=false;
+var db=null;
+try{
+if(firebaseConfig.apiKey&&firebaseConfig.apiKey.indexOf("AIza")===0){
+firebase.initializeApp(firebaseConfig);
+db=firebase.firestore();
+fbReady=true;
+console.log("Firebase connecte");
+}else{
+console.log("Firebase non configure");
+}
+}catch(e){console.log("Firebase erreur:",e);fbReady=false;}
+
+/* ============ FONCTIONS FIREBASE ============ */
+function fbSave(collection,key,value){
+save(collection+"_"+key,value);
+if(!fbReady)return Promise.resolve();
+return db.collection(collection).doc(key).set({data:value,updated:Date.now()})
+.then(function(){return true;})
+.catch(function(e){console.log("fbSave err:",e);return false;});
+}
+function fbLoad(collection,key,defaultValue){
+if(!fbReady)return Promise.resolve(load(collection+"_"+key,defaultValue));
+return db.collection(collection).doc(key).get()
+.then(function(doc){
+if(doc.exists){var v=doc.data().data;save(collection+"_"+key,v);return v;}
+return defaultValue;
+})
+.catch(function(e){console.log("fbLoad err:",e);return load(collection+"_"+key,defaultValue);});
+}
+function fbWatchCollection(collection,callback){
+if(!fbReady)return function(){};
+return db.collection(collection).onSnapshot(function(snapshot){
+var arr=[];
+snapshot.forEach(function(doc){var d=doc.data().data;if(d)arr.push(d);});
+callback(arr);
+},function(e){console.log("fbWatchCollection err:",e);});
+}
+
+/* ============ NOTIFICATIONS TEMPS REEL ============ */
+var lastNotifCheck=load('lastNotifCheck',Date.now());
+var seenVendeurs=load('seenVendeurs',[]);
+var notifBell=null;
+
+function initNotifBell(){
+if(document.getElementById('notifBell'))return;
+var b=document.createElement('button');
+b.id='notifBell';
+b.innerHTML='🔔 <span id="notifCount" style="background:#EF4444;color:#fff;border-radius:10px;padding:1px 6px;font-size:10px;margin-left:3px;display:none">0</span>';
+b.style.cssText='position:fixed;top:60px;right:10px;z-index:500;background:rgba(17,24,39,0.95);border:1px solid #1E293B;color:#fff;padding:8px 12px;border-radius:20px;font-size:14px;cursor:pointer;font-weight:700';
+b.onclick=function(){showNotifPanel();};
+document.body.appendChild(b);
+notifBell=b;
+}
+
+function updateNotifCount(n){
+var c=document.getElementById('notifCount');
+if(!c)return;
+if(n>0){c.textContent=n;c.style.display='inline-block';}
+else{c.style.display='none';}
+}
+
+function notifToast(title,msg){
+/* Toast special notification */
+var t=document.createElement('div');
+t.style.cssText='position:fixed;top:110px;right:10px;background:linear-gradient(135deg,#009E60,#003DA5);color:#fff;padding:12px 18px;border-radius:14px;font-size:13px;font-weight:600;z-index:99999;box-shadow:0 6px 20px rgba(0,0,0,0.4);max-width:280px;animation:slideIn 0.4s ease-out';
+t.innerHTML='<div style="font-weight:700;margin-bottom:4px">'+title+'</div><div style="font-size:11px;opacity:0.9">'+msg+'</div>';
+document.body.appendChild(t);
+setTimeout(function(){t.style.transition='opacity 0.5s';t.style.opacity='0';setTimeout(function(){t.remove();},500);},5000);
+}
+
+var notifList=[];
+function showNotifPanel(){
+var html='<div class="hd"><button class="bk" onclick="closeNotifPanel()">&#8592;</button><h1>Notifications</h1></div>';
+if(notifList.length===0){html+='<div class="emp"><span class="ic">🔔</span>Aucune notification</div>';}
+else{notifList.slice().reverse().forEach(function(n){
+html+='<div class="card"><div class="fw">'+n.title+'</div><div class="cs">'+n.msg+'</div><div class="cs" style="font-size:10px;opacity:0.7">'+n.date+'</div></div>';
+});}
+html+='<button class="backBtn" onclick="closeNotifPanel()">&#8592; Fermer</button>';
+var el=document.getElementById('pgNotif');
+if(!el){
+el=document.createElement('div');
+el.className='page';
+el.id='pgNotif';
+document.body.appendChild(el);
+}
+el.innerHTML=html;
+document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on');});
+el.classList.add('on');
+document.getElementById('navbar').classList.add('off');
+}
+function closeNotifPanel(){
+document.getElementById('pgNotif').classList.remove('on');
+show('home');
+}
+
 /* ===== I18N ===== */
 var LANG=load('lang','fr');
 var I18N={
@@ -615,7 +726,7 @@ settings:'Parametres',theme:'Theme',themeSub:'Sombre ou clair',language:'Langue'
 gpsTitle:'Suivi GPS',gpsEnable:'Activer GPS',gpsActivate:'Activer mon GPS',callDriver:'Appeler livreur',
 findDriver:'Trouver chauffeur',sendParcel:'Envoyer un colis',sendBtn:'Envoyer',apply:'Postuler',sendApp:'Envoyer candidature',
 mapTitle:'Carte du Gabon',chatPh:'Ecrire...',cultureMeta:'NeylaConnect 241 - Culture',guestName:'Invite',
-toastCalling:'Appel de ',toastNoNum:'Numero indisponible',toastBadNum:'Numero invalide',toastThemeLight:'Mode clair',toastThemeDark:'Mode sombre',toastLangFr:'Francais',toastLangEn:'English',toastWelcomeGuest:'Bienvenue invite !',toastDataUpdated:'Donnees mises a jour'},
+toastCalling:'Appel de ',toastNoNum:'Numero indisponible',toastBadNum:'Numero invalide',toastThemeLight:'Mode clair',toastThemeDark:'Mode sombre',toastLangFr:'Francais',toastLangEn:'English',toastWelcomeGuest:'Bienvenue invite !',toastDataUpdated:'Donnees mises a jour',toastNewVendeur:'Nouveau vendeur !',toastNewMessage:'Nouveau message !'},
 en:{tagline:'Gabon connected',chooseProfile:'Choose your profile',secClient:'CLIENT',secEmploi:'JOBS & RECRUITMENT',secEdu:'EDUCATION & HEALTH',secCommerce:'SHOPS & SERVICES',secTransport:'TRANSPORT & HOUSING',secEvents:'EVENTS & LEISURE',secNature:'NATURE & HERITAGE',secAutres:'OTHERS',role_client:'Client / Traveler',role_clientDesc:'Search, book',role_recrutement:'Recruitment',role_recrutementDesc:'Jobs and internships',role_universite:'University',role_sante:'Health',role_assurance:'Insurance',role_resto:'Restaurant',role_hotel:'Hotel',role_magasin:'Store',role_salon:'Salon',role_snack:'Snack',role_bar:'Bar',role_livreur:'Delivery',role_taxi:'Taxi',role_bus:'Bus',role_train:'Train',role_avion:'Airline',role_bateau:'Boat',role_location_vehicule:'Vehicles',role_location_vehiculeDesc:'Rental & sale',role_immobilier:'Houses',role_immobilierDesc:'Rental & sale',role_logistique:'Logistics',role_chaise:'Chair',role_hotesse:'Hostess',role_traiteur:'Caterer',role_tourisme:'Tourism',role_divertissement:'Leisure',role_organisateur:'Events',role_animateur:'Entertainer',role_groupe:'Group',role_boite:'Nightclub',role_parcs:'Parks',role_chutes:'Waterfalls',role_rural:'Villages',role_culture:'Culture & History',role_banque:'Bank',role_aeroport:'Airport',role_autre:'Other',
 lblNom:'Full name',phNom:'Ex: John Doe',lblEtab:'Business',phEtab:'Ex: UOB',lblEmail:'Email',phEmail:'example@mail.com',lblPass:'Password',phPass:'Min 4 characters',lblTel:'Phone',lblVille:'City',lblQuartier:'Neighborhood',lblTelReq:'Phone',lblPhoto:'Photo',lblPrix:'Price FCFA',lblEtabName:'Business name',lblDesc:'Description',lblNewPass:'New password',lblType:'Type',lblNumber:'Number',lblHolder:'Holder',lblMainNum:'Main',lblSecondNum:'Secondary',lblDepart:'Pickup',lblDest:'Destination',lblYourNum:'Your number',lblYourName:'Your name',lblYourTel:'Your phone',lblReceiver:'Receiver',lblReceiverTel:'Receiver phone',lblAddress:'Address',lblWeight:'Weight',lblYourNameFull:'Full name',lblMotivation:'Motivation',phName:'Name',phPrice:'Price',phDesc:'Description',
 signup:'Create account',login:'Sign in',alreadyReg:'- already registered? -',connected:'Connected',continue:'Continue',logout:'Sign out',guest:'Enter as guest',guestHint:'No account?',
@@ -625,7 +736,7 @@ settings:'Settings',theme:'Theme',themeSub:'Dark or light',language:'Language',l
 gpsTitle:'GPS tracking',gpsEnable:'Enable GPS',gpsActivate:'Enable GPS',callDriver:'Call driver',
 findDriver:'Find driver',sendParcel:'Send parcel',sendBtn:'Send',apply:'Apply',sendApp:'Send application',
 mapTitle:'Gabon Map',chatPh:'Write...',cultureMeta:'NeylaConnect 241 - Culture',guestName:'Guest',
-toastCalling:'Calling ',toastNoNum:'Number unavailable',toastBadNum:'Invalid number',toastThemeLight:'Light mode',toastThemeDark:'Dark mode',toastLangFr:'Francais',toastLangEn:'English',toastWelcomeGuest:'Welcome guest!',toastDataUpdated:'Data updated'}};
+toastCalling:'Calling ',toastNoNum:'Number unavailable',toastBadNum:'Invalid number',toastThemeLight:'Light mode',toastThemeDark:'Dark mode',toastLangFr:'Francais',toastLangEn:'English',toastWelcomeGuest:'Welcome guest!',toastDataUpdated:'Data updated',toastNewVendeur:'New seller!',toastNewMessage:'New message!'}};
 function t(k){return (I18N[LANG]&&I18N[LANG][k])||(I18N.fr[k])||k;}
 function applyI18N(){
 document.querySelectorAll('[data-i18n]').forEach(function(el){var k=el.getAttribute('data-i18n');var v=t(k);if(v&&v!==k)el.textContent=v;});
@@ -648,6 +759,7 @@ function toggleLang(){
 LANG=LANG==='fr'?'en':'fr';save('lang',LANG);applyI18N();
 toast(LANG==='en'?t('toastLangEn'):t('toastLangFr'));
 }
+
 function appeler(numero){
 if(!numero){toast(t('toastNoNum'),true);return;}
 var n=String(numero).trim();
@@ -660,9 +772,11 @@ if(!clean||clean.replace(/\D/g,'').length<3){toast(t('toastBadNum'),true);return
 toast(t('toastCalling')+n);
 setTimeout(function(){try{window.location.href='tel:'+clean;}catch(e){}},120);
 }
+
 function save(k,v){try{localStorage.setItem('n241_'+k,JSON.stringify(v));}catch(e){}}
 function load(k,d){try{var v=localStorage.getItem('n241_'+k);return v?JSON.parse(v):d;}catch(e){return d;}}
-  /* ===== FOND ===== */
+
+/* ===== FOND ===== */
 var BG_IMAGES=["https://images.unsplash.com/photo-1569336770403-d1d8c7cd8b4a?w=1200","https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?w=1200","https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1200","https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200","https://images.unsplash.com/photo-1549366021-9f761d450615?w=1200","https://images.unsplash.com/photo-1516426122078-c23e76319801?w=1200","https://images.unsplash.com/photo-1521651201144-634f700b36ef?w=1200","https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200","https://images.unsplash.com/photo-1473448912268-2022ce9509d8?w=1200","https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?w=1200"];
 var bgIdx=0;
 function initBgSlideshow(){
@@ -753,7 +867,6 @@ history.replaceState({page:'login'},'',window.location.href);
 var TABS_CLIENT=[['home','Accueil','🏠'],['messages','Messages','💬'],['factures','Factures','🧾'],['profil','Profil','👤']];
 var TABS_VENDEUR=[['pro','Mon espace','🏪'],['messages','Messages','💬'],['factures','Factures','🧾'],['profil','Profil','👤']];
 var PAGES_AVEC_TABS=['home','pro','messages','factures','profil'];
-  var PAGES_AVEC_TABS=['home','pro','messages','factures','profil'];
   /* ================= BASE DE DONNEES DEMO ================= */
 var DEMO_VENDEURS=[
 {id:'job1',categorie:'recrutement',nom:"BGFI Bank recrute",ville:"Libreville",quartier:"Centre",tel:"+241 01 76 33 33",email:"recrutement@bgfi.com",prix:"Selon profil",desc:"La BGFI Bank recrute pour plusieurs postes.",photo:"https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=600",articles:[{nom:"Charge de clientele",prix:0,desc:"CDI - Bac+3"},{nom:"Analyste credit",prix:0,desc:"CDI - Master Finance"}]},
@@ -797,32 +910,58 @@ var DEMO_VENDEURS=[
 {id:'vill_kango',categorie:'rural',nom:"Kango",ville:"Kango",quartier:"Estuaire",tel:"",email:"",prix:"",desc:"Chef-lieu du Komo.",photo:"https://images.unsplash.com/photo-1493246507139-91e8fad9978e?w=600",articles:[]},
 {id:'vill_cocobeach',categorie:'rural',nom:"Cocobeach",ville:"Cocobeach",quartier:"Estuaire",tel:"",email:"",prix:"",desc:"Frontiere Guinee Equatoriale.",photo:"https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=600",articles:[]},
 {id:'vill_settecama',categorie:'rural',nom:"Sette Cama",ville:"Sette Cama",quartier:"Ogooue-Maritime",tel:"",email:"",prix:"",desc:"Village de pecheurs.",photo:"https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600",articles:[]},
-{id:'cul_histoire',categorie:'culture',nom:"Histoire du Gabon",ville:"National",quartier:"Tout le pays",tel:"",email:"",prix:"",photo:"https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?w=600",
-desc:"Le Gabon, perle de l Afrique centrale, possede une histoire millenaire qui remonte bien avant l arrivee des Europeens. Terre de diversite ethnique et culturelle, ce pays a vu se succeder des royaumes puissants, des empires commerciaux, puis a traverse l epreuve de la colonisation avant de conquerir son independance. De la decouverte portugaise a la transition politique de 2023, l histoire du Gabon est celle d un peuple resilient, fier de ses racines et tourne vers l avenir.§§Ce recit retrace les grandes etapes qui ont faconne la nation gabonaise, des premieres migrations bantoues jusqu aux defis contemporains.",
-articles:[
-{nom:"Chapitre 01 - Les origines et les migrations bantoues",prix:0,desc:"Bien avant l arrivee des navigateurs europeens, le territoire qui deviendra le Gabon etait habite par des peuples pygmees, notamment les Baka et les Babongo, premiers occupants de la foret equatoriale. Ces chasseurs-cueilleurs vivaient en harmonie avec la nature, maitrisant les secrets de la foret dense et des rivieres poissonneuses.§§A partir du premier millenaire de notre ere, des vagues successives de migrations bantoues venues du nord-est de l Afrique ont progressivement peuple la region. Ces peuples apportaient avec eux l agriculture, la metallurgie du fer et une organisation sociale complexe. Les Fang, les Mpongwe, les Punu, les Kota, les Tsogo, les Nzebi, les Teke et bien d autres groupes ethniques se sont ainsi installes sur ce territoire, formant la mosaique culturelle qui caracterise encore aujourd hui le Gabon.§§Chaque peuple developpa ses propres traditions, ses rites, sa langue et son organisation politique. Des chefferies puissantes se constituerent le long des fleuves et de la cote atlantique, controlant le commerce du sel, du poisson seche, des etoffes de raphia et du bois precieux. Les Mpongwe, installes sur les rives de l estuaire, devinrent rapidement des intermediaires incontournables du commerce regional, bien avant l arrivee des Europeens."},
-{nom:"Chapitre 02 - 1472, la decouverte portugaise et le nom Gabon",prix:0,desc:"En 1472, les navigateurs portugais, lances dans leur grande entreprise d exploration des cotes africaines, atteignirent l estuaire d un fleuve majestueux qu ils baptiserent du nom de Gabao. Ce mot portugais signifie manteau a capuche, en reference a la forme de l estuaire qui s ouvre en s elargissant vers la mer, rappelant la silhouette d un manteau.§§Les Portugais ne s installerent pas durablement, mais ils etablirent des comptoirs commerciaux et initierent des echanges avec les populations locales. Ils achetaient de l ivoire, du bois precieux, du poivre et des esclaves en echange de tissus, de perles, d alcool et d armes a feu. Ce commerce transatlantique allait profondement bouleverser l equilibre des societes locales.§§D autres nations europeennes suivirent : les Hollandais, les Anglais et les Francais vinrent tour a tour sur ces cotes pour y commercer. Le nom Gabon resta attache a cette terre et a son estuaire, designant peu a peu l ensemble de la region cotiere, puis le pays tout entier."},
-{nom:"Chapitre 03 - XVIIe et XIXe siecles, la traite negriere",prix:0,desc:"Du XVIIe au XIXe siecle, la traite negriere atlantique marqua profondement le territoire gabonais. Les Europeens, notamment les Portugais, les Hollandais, les Anglais et les Francais, organiserent la deportation massive d Africains vers les Ameriques. Le Gabon, avec ses nombreux ports naturels et ses populations cotieres, devint l une des regions d approvisionnement en esclaves.§§Des chefs locaux participerent a ce commerce, capturant des prisonniers de guerre ou des personnes endettees pour les vendre aux negriers europeens. Cette periode tragique provoqua des deplacements massifs de populations, des guerres inter-ethniques et un bouleversement profond des structures sociales traditionnelles.§§Cependant, des le debut du XIXe siecle, un mouvement abolitionniste se developpa en Europe. En 1815, le Congres de Vienne condamna la traite negriere. La France, l Angleterre et d autres puissances s engagerent a lutter contre ce commerce honteux. C est dans ce contexte que les premieres patrouilles navales anti-esclavagistes sillonnerent les cotes gabonaises, arraisonnant les navires negriers et liberant leurs captifs."},
-{nom:"Chapitre 04 - 1839, le traite avec le roi Denis",prix:0,desc:"En 1839, le capitaine de vaisseau francais Edouard Bouet-Willaumez, commandant de la station navale francaise sur les cotes occidentales d Afrique, signa un traite avec le roi Mpongwe Antoine Denis Rapontchombo, dit le roi Denis. Ce traite marquait le debut officiel de la presence francaise au Gabon.§§Le roi Denis, souverain eclaire et habile diplomate, vit dans cette alliance un moyen de proteger son peuple des razzias esclavagistes et de renforcer son autorite face aux rivalites locales. En echange, il ceda a la France une portion de territoire sur la rive droite de l estuaire. Ce fut le premier acte de ce qui allait devenir la colonie du Gabon.§§En 1843, le fort d Aumale fut construit sur cette concession, marquant la presence militaire francaise permanente. La France y installa une garnison, un hopital et une ecole pour les enfants des notables locaux. De nouveaux traites furent signes avec d autres chefs cotiers, etendant progressivement l influence francaise le long du littoral."},
-{nom:"Chapitre 05 - 1849, la fondation de Libreville",prix:0,desc:"En 1849, un evenement capital allait donner naissance a la capitale du Gabon. Le navire negrier bresilien Elizia fut arraisonne au large des cotes par la marine francaise. A son bord se trouvaient plusieurs dizaines d esclaves africains qui furent liberes par les autorites francaises.§§Ne pouvant ni les rapatrier dans leurs regions d origine ni les laisser errer sans protection, le commandant francais Edouard Bouet-Willaumez decida de les installer sur un plateau de la rive droite de l estuaire. Ces hommes et ces femmes fonderent ainsi un village qui prit le nom de Libreville, en hommage a leur liberation.§§Le nom original fut d abord Fort d Aumale, puis Libreville s imposa progressivement. La ville se developpa rapidement grace a sa position strategique, devenant un carrefour commercial entre l interieur du continent et la cote atlantique. Des missionnaires catholiques et protestants y etablirent des ecoles et des eglises, contribuant a la diffusion de l education et du christianisme.§§Au fil des decennies, Libreville devint le centre administratif, economique et politique de la colonie, role qu elle conserve encore aujourd hui comme capitale de la Republique gabonaise."},
-{nom:"Chapitre 06 - 1885 a 1910, l exploration de l interieur",prix:0,desc:"Apres s etre implantee sur la cote, la France entreprit d explorer et de conquerir l interieur du territoire gabonais. De grands explorateurs francais, comme Pierre Savorgnan de Brazza, jouerent un role determinant dans cette entreprise. Brazza remonta le fleuve Ogooue, signa des traites avec les chefs locaux et etendit l influence francaise jusqu au coeur du continent.§§En 1885, la conference de Berlin partagea l Afrique entre les puissances europeennes. Le Gabon fut integre a l Afrique-Equatoriale francaise (AEF), vaste ensemble colonial qui regroupait egalement le Congo, l Oubangui-Chari et le Tchad. Libreville devint la capitale de cette federation.§§L exploitation des richesses naturelles, ivoire, caoutchouc, bois precieux, fut organisee au profit de la metropole. Des compagnies concessionnaires reçurent d immenses territoires qu elles exploiterent sans menagement, recourant parfois au travail force. De nombreux villages furent deplaces, des populations decimees par les maladies et les mauvais traitements.§§Malgre ces epreuves, les populations gabonaises surent preserver leur identite culturelle. Les langues, les rites, les traditions se transmirent de generation en generation, en depit de la politique d assimilation menee par l administration coloniale."},
-{nom:"Chapitre 07 - 1914 a 1945, les Gabonais dans les guerres mondiales",prix:0,desc:"Lors de la Premiere Guerre mondiale, des milliers de Gabonais furent mobilises pour servir la France. Ils combattirent dans les tranchees d Europe, notamment dans le celebre bataillon des tirailleurs senegalais, ou ils firent preuve d un courage remarquable. Beaucoup ne revinrent jamais.§§En 1914, les combats toucherent aussi directement le Gabon, avec la campagne du Cameroun allemand voisin. Des affrontements eurent lieu a la frontiere nord, mobilisant les troupes coloniales francaises basees a Libreville.§§Pendant la Seconde Guerre mondiale, le Gabon joua un role particulier. En 1940, apres la defaite de la France face a l Allemagne, le gouverneur du Gabon refusa de rallier le general de Gaulle et la France libre. Une expedition militaire, menee par les Forces francaises libres, fut necessaire pour reprendre le controle du territoire. Ce fut la bataille de Libreville, qui se deroula du 8 au 12 novembre 1940.§§Apres la guerre, en 1946, le Gabon devint un Territoire d Outre-Mer francais, avec une representation au Parlement francais. Leon M Ba fut elu depute a l Assemblee nationale francaise, marquant l entree des Gabonais dans la vie politique moderne."},
-{nom:"Chapitre 08 - 17 aout 1960, l independance du Gabon",prix:0,desc:"Le 17 aout 1960, le Gabon proclama son independance et devint une Republique souveraine. Leon M Ba, leader charismatique du Bloc democratique gabonais (BDG), en devint le premier president. La ceremonie officielle se deroula a Libreville, en presence de nombreuses delegations etrangeres, dans une atmosphere de fete nationale.§§L independance fut le fruit d un long processus politique engage apres la Seconde Guerre mondiale. La loi-cadre Defferre de 1956 accorda une large autonomie aux territoires d outre-mer. En 1958, le Gabon choisit, par referendum, de devenir une Republique autonome au sein de la Communaute francaise. Deux ans plus tard, l independance totale etait proclamee.§§Leon M Ba, ne a Libreville en 1902, etait un homme politique experimente, respecte pour son autorite et son pragmatisme. Il forma le premier gouvernement gabonais, mit en place les institutions de la jeune Republique et entreprit de doter le pays d infrastructures modernes.§§Cette periode fut marquee par un grand espoir : celui de construire une nation unie, prospere et respectee sur la scene africaine et internationale. Les annees qui suivirent virent la creation de nombreuses institutions, l ouverture d ecoles et d hopitaux, et le developpement des premieres infrastructures modernes."},
-{nom:"Chapitre 09 - 1967 a 2009, l ere Omar Bongo Ondimba",prix:0,desc:"En novembre 1967, a la mort de Leon M Ba, Albert-Bernard Bongo, alors vice-president, acceda a la presidence de la Republique. Il avait a peine 32 ans. Il allait diriger le Gabon pendant plus de quarante ans, devenant l un des chefs d Etat les plus longtemps au pouvoir en Afrique.§§Des son arrivee, il instaura un regime de parti unique, le Parti democratique gabonais (PDG), qui controlait toute la vie politique nationale. En 1973, il se convertit a l islam et prit le nom d Omar Bongo. Il developpa une diplomatie active, se positionnant comme un mediateur respecte dans les conflits africains.§§Le Gabon connut, sous sa presidence, une croissance economique spectaculaire grace a l exploitation petroliere. Le pays devint l un des plus riches d Afrique en termes de PIB par habitant. Cette manne financiere permit la construction de nombreuses infrastructures : routes, hopitaux, ecoles, aeroports, palais presidentiel. Mais elle creusa aussi de profondes inegalites sociales.§§En 1989, sous la pression populaire et dans le contexte de la fin de la Guerre froide, Omar Bongo introduisit le multipartisme. Des elections pluralistes furent organisees, mais le PDG conserva le pouvoir. Les critiques contre le regime se multiplierent, denoncant la mainmise sur les ressources petrolieres, la corruption et le manque de libertes.§§Omar Bongo Ondimba s eteignit le 8 juin 2009 dans une clinique espagnole, laissant derriere lui un pays transforme mais aussi profondement marque par ses annees de pouvoir."},
-{nom:"Chapitre 10 - 2009 a 2023, Ali Bongo et la transition",prix:0,desc:"Apres la mort d Omar Bongo, son fils Ali Bongo Ondimba fut elu president en 2009, dans un scrutin conteste par l opposition. Il fut reelu en 2016 et 2023, mais son mandat fut marque par de nombreuses controverses et par une crise politique persistante.§§En 2018, Ali Bongo fut victime d un accident vasculaire cerebral qui l eloigna du pouvoir pendant plusieurs mois. Son absence alimenta les speculations sur sa capacite a gouverner. L opposition, menee notamment par Jean Ping, contesta vivement les resultats electoraux.§§Le 30 aout 2023, au lendemain de l election presidentielle qui venait de le declarer vainqueur, un groupe de militaires dirige par le general Brice Clotaire Oligui Nguema renversa Ali Bongo et annonca la creation du Comite pour la transition et la restauration des institutions (CTRI). Cette transition militaire mit fin a 56 ans de pouvoir de la famille Bongo.§§Le general Oligui Nguema, investi president de la transition, promit une transition de deux ans, la redaction d une nouvelle Constitution et l organisation d elections libres. Une nouvelle page de l histoire du Gabon s ouvrit alors, porteuse d espoirs mais aussi d incertitudes."},
-{nom:"Chapitre 11 - Le Gabon d aujourd hui, defis et perspectives",prix:0,desc:"Le Gabon d aujourd hui est un pays en pleine mutation. Dote d une richesse naturelle exceptionnelle, petrole, forets, minerais, biodiversite, il doit relever de nombreux defis pour construire un avenir durable et prospere pour tous ses citoyens.§§La diversification economique est au coeur des preoccupations. Le pays cherche a reduire sa dependance au petrole en developpant l agriculture, le tourisme, les energies renouvelables et l economie numerique. Le programme Gabon Emergent vise a faire du pays une nation moderne et competitive.§§La preservation de l environnement constitue un autre enjeu majeur. Le Gabon, avec 88% de son territoire couvert de foret, est un acteur cle dans la lutte contre le changement climatique. Ses treize parcs nationaux protegent une biodiversite unique au monde. Le pays a fait de la protection de la nature une priorite nationale et internationale.§§Sur le plan social, le Gabon doit faire face a la jeunesse de sa population, au chomage, aux inegalites persistantes. L education et la sante restent des priorites pour le developpement du capital humain.§§Enfin, la transition politique engagee en 2023 ouvre une nouvelle ere. Les Gabonais aspirent a davantage de democratie, de transparence et de justice sociale. L histoire du Gabon continue de s ecrire, portee par la resilience et l espoir de tout un peuple."}]},
-{id:'cul_masques',categorie:'culture',nom:"Masques et Sculptures du Gabon",ville:"National",quartier:"Tout le pays",tel:"",email:"",prix:"",photo:"https://images.unsplash.com/photo-1569336770403-d1d8c7cd8b4a?w=600",
-desc:"L art traditionnel gabonais est l un des plus riches et des plus fascinants d Afrique. Reconnu mondialement pour ses masques sacres et ses sculptures sur bois d une beaute saisissante, il incarne la profonde spiritualite et la creativite exceptionnelle des peuples qui habitent cette terre depuis des millenaires.§§Chaque masque, chaque statuette, chaque objet rituel est porteur d un sens profond : il incarne un esprit, un ancetre, une force de la nature, un gardien du savoir ou un messager entre les mondes visible et invisible. Les masques sont utilises lors de ceremonies d initiation, de deuil, de justice, de guerison ou de celebration.§§Ils ne sont jamais de simples objets decoratifs : ils sont vivants, charges de pouvoir, respectes et craints. Les peuples Fang, Punu, Kota, Tsogo, Mpongwe, Nzebi et bien d autres ont cree, au fil des siecles, un art d une diversite et d une puissance remarquables, qui a influence de nombreux artistes occidentaux du XXe siecle, notamment les peintres cubistes comme Picasso.",
-articles:[
-{nom:"Chapitre 01 - Le masque Fang Ngil, l esprit de la justice",prix:0,desc:"Le masque Ngil est l un des chefs-d oeuvre les plus celebres de l art africain. Il etait utilise par la societe secrete Ngil, une confrerie puissante qui avait pour mission de rendre la justice, de demasquer les sorciers, de resoudre les conflits et de maintenir l ordre social dans les communautes Fang de la foret equatoriale.§§Ce masque se reconnait a son visage allonge, en forme de coeur, recouvert d une fine couche de kaolin blanc. Ce blanc symbolise le monde des esprits, des ancetres et de la sagesse. Les yeux sont representes par des fentes etroites, la bouche est a peine esquissee. Le front est haut, le nez droit et fin. L ensemble degage une impression d equilibre, de serenite et de puissance contenue.§§Le porteur du masque, vetu de fibres de raphia et de tissus colores, apparaissait lors de ceremonies nocturnes. Il incarnait l esprit du Ngil, qui venait du monde des ancetres pour retablir la verite et chatier les coupables. Sa simple apparition suffisait a terrifier les villageois et a faire avouer les fautifs.§§Le masque Ngil est aujourd hui considere comme un tresor national du Gabon et un chef-d oeuvre de l art mondial. Des exemplaires remarquables sont conserves dans les plus grands musees du monde, notamment au musee du Louvre et au Centre Pompidou a Paris, ainsi qu au Metropolitan Museum of Art de New York. Un specimen exceptionnel a ete vendu aux encheres en 2006 pour plus de six millions d euros, un record pour un masque africain."},
-{nom:"Chapitre 02 - Le masque Punu Mukudj, la beaute feminine",prix:0,desc:"Le masque Mukudj, cree par le peuple Punu de la region de la Ngounie, est l un des masques les plus elegants et les plus raffines de l art africain. Il represente l ideal de la beaute feminine : un visage serein, paisible, aux traits fins et harmonieux, entierement recouvert de kaolin blanc.§§Les yeux du Mukudj sont mi-clos, comme plonges dans une meditation profonde. Les levres sont legerement ourlees et peintes d un rouge sombre. Le front est orne d une coiffure complexe, composee de multiples tresses ou de fibres vegetales finement travaillees. Sur les tempes et les joues figurent parfois des scarifications en forme de losange, marques de beaute traditionnelles des Punu.§§Ce masque etait porte par des danseurs masculins, qui se produisaient juches sur de hautes echasses lors des ceremonies du mukudj. Ce ballet spectaculaire, execute a l occasion de funerailles, de mariages ou de grands rassemblements, mettait en scene l esprit d une jeune femme decedee, venue du monde des ancetres pour danser parmi les vivants.§§La hauteur des echasses, la lenteur majestueuse des mouvements, la blancheur lumineuse du masque dans la penombre creaient une atmosphere magique et poignante. Le mukudj etait bien plus qu un spectacle : il etait un hommage aux defunts, une celebration de la vie, une meditation sur la beaute et la fragilite de l existence.§§Les masques Mukudj comptent parmi les pieces les plus recherchees par les collectionneurs et les musees du monde entier. Leur grace et leur serenite continuent de fasciner et d inspirer."},
-{nom:"Chapitre 03 - Le masque Kota Emboli, gardien des reliques",prix:0,desc:"Le masque Emboli, cree par les peuples Kota et Mahongwe de la vallee de l Ivindo, est un masque-heaume d un style tres particulier, reconnaissable entre tous. Il se caracterise par sa forme angulaire, ses lignes geometriques et sa structure en bois recouverte de fines lamelles de cuivre et de laiton.§§Utilise lors des rites de circoncision de la societe secrete Satsi, l Emboli etait porte par un danseur qui parcourait le village en executant des mouvements rapides et saccades. Son apparition marquait une etape importante dans la vie des jeunes garcons, qui accedaient alors au monde des adultes et recevaient l enseignement des traditions ancestrales.§§Le masque Emboli etait etroitement associe au culte des reliques. Les Kota sont en effet celebres pour leurs reliquaires en bois et en cuivre, appeles bwete, qui contenaient les ossements d ancetres veneres. Ces reliquaires, ornes de figures stylisees en cuivre, etaient conserves dans des sanctuaires et proteges par les esprits que les masques incarnaient.§§L art Kota, avec ses formes geometriques et ses materiaux precieux, a profondement marque l art moderne. Les artistes cubistes, fascines par la simplification des volumes et la puissance des lignes, s en sont largement inspires. Aujourd hui, les masques et reliquaires Kota comptent parmi les pieces les plus precieuses des collections d art africain dans le monde."},
-{nom:"Chapitre 04 - Le masque Tsogo Pove, l ancetre primordial",prix:0,desc:"Chez les Tsogo et les peuples apparentes de la Ngounie, le masque Pove incarne Muhunzu, l ancetre primordial, le premier homme, le fondateur mythique de la societe initiatique Bwiti. Il est l un des masques les plus sacres et les plus veneres du Gabon.§§Le visage du Pove est noirci au charbon de bois, ce qui lui donne une apparence sombre et mysterieuse. Les traits sont tailles avec une grande economie de moyens : un front haut, des yeux en amande, une bouche etroite. La coiffe est en fibres vegetales naturelles ou teintees, parfois ornee de plumes et de cauris.§§Le Pove apparait lors des ceremonies de deuil, des initiations au Bwiti et des rituels de justice. Il est charge de veiller au respect des traditions, de pacifier les conflits, de guider les ames des defunts vers le monde des ancetres. Sa presence est a la fois protectrice et redoutable.§§Lorsqu il surgit au milieu du village, porte par un initie en transe, accompagne du son des tambours et des chants sacres, le Pove cree un moment d intense emotion collective. Les participants entrent en communication avec le monde invisible, reçoivent les messages des ancetres, renouvellent leur engagement envers les valeurs de la communaute.§§Le masque Pove est bien plus qu un objet : il est l ame du peuple Tsogo, le gardien de sa memoire, le lien vivant entre le passe et le present. Sa sacralite demeure intacte et continue de nourrir la spiritualite de nombreux Gabonais."},
-{nom:"Chapitre 05 - Les sculptures et statuettes rituelles",prix:0,desc:"Outre les masques, l art gabonais s exprime a travers une riche tradition de sculptures et de statuettes rituelles. Ces objets, tailles dans le bois, parfois ornes de metal, de perles, de fibres ou de pigments, remplissent des fonctions multiples : protection, guerison, fecondite, divination, commemoration.§§Chez les Fang, les celebres statuettes bieri gardaient les ossements des ancetres et veillaient sur la famille. Leur style sobre, geometrique, aux volumes simplifies, a profondement influence l art moderne europeen.§§Chez les Punu, les statuettes representant des femmes portant un enfant ou une coupe etaient utilisees lors des rites de fecondite ou de divination. Leur beaute sereine et leur elegance rappellent celles des masques Mukudj.§§Chez les Nzebi et les Tsogo, les figures d ancetres et les fetisches charges de puissance magique jouaient un role central dans la vie spirituelle. Certains etaient recouverts de miroirs, de clous ou de charges rituelles, leur conferant une force redoutable.§§Aujourd hui, cet heritage artistique exceptionnel est preserve dans les musees nationaux et internationaux. Les sculpteurs gabonais contemporains perpetuent cette tradition tout en la reinventant, melant les techniques ancestrales a des preoccupations modernes. Leur travail temoigne de la vitalite et de la creativite d un art qui ne cesse de se renouveler."},
-{nom:"Chapitre 06 - L heritage et la transmission aujourd hui",prix:0,desc:"L art traditionnel gabonais n est pas un vestige du passe : il est vivant, il se transmet, il se transforme. De nombreux sculpteurs, danseurs, musiciens, inities perpetuent aujourd hui les traditions de leurs ancetres, tout en les adaptant au monde contemporain.§§Les ecoles d art de Libreville et de Franceville forment de jeunes createurs qui s inspirent des motifs et des techniques ancestrales. Les festivals culturels, comme le Festival national des arts et de la culture, celebrent chaque annee la richesse du patrimoine gabonais. Les villages, les quartiers, les familles continuent d organiser des ceremonies ou les masques dansent encore.§§Le tourisme culturel se developpe, offrant aux visiteurs du monde entier la possibilite de decouvrir cette richesse. Les parcs nationaux, les villages traditionnels, les musees offrent des espaces ou l art gabonais se donne a voir et a comprendre.§§Mais l heritage culturel gabonais est aussi menace : par la modernisation rapide, par la mondialisation, par la perte des langues et des savoirs. Preserver cet heritage est un defi majeur pour les generations actuelles et futures.§§Heureusement, de nombreuses initiatives voient le jour pour documenter, proteger et transmettre cet art exceptionnel. Le Gabon prend conscience de la valeur inestimable de son patrimoine et met en place des politiques culturelles ambitieuses. L avenir de l art gabonais dependra de la capacite de chaque Gabonais, de chaque communaute, a reconnaitre, a honorer et a faire vivre cette richesse unique au monde."}]},
+{id:'cul_histoire',categorie:'culture',nom:"Histoire du Gabon",ville:"National",quartier:"Tout le pays",tel:"",email:"",prix:"",photo:"https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?w=600",desc:"Le Gabon, perle de l Afrique centrale, possede une histoire millenaire qui remonte bien avant l arrivee des Europeens. Terre de diversite ethnique et culturelle, ce pays a vu se succeder des royaumes puissants, des empires commerciaux, puis a traverse l epreuve de la colonisation avant de conquerir son independance. De la decouverte portugaise a la transition politique de 2023, l histoire du Gabon est celle d un peuple resilient, fier de ses racines et tourne vers l avenir.§§Ce recit retrace les grandes etapes qui ont faconne la nation gabonaise, des premieres migrations bantoues jusqu aux defis contemporains.",articles:[
+{nom:"Chapitre 01 - Les origines et les migrations bantoues",prix:0,desc:"Bien avant l arrivee des navigateurs europeens, le territoire qui deviendra le Gabon etait habite par des peuples pygmees, notamment les Baka et les Babongo, premiers occupants de la foret equatoriale. Ces chasseurs-cueilleurs vivaient en harmonie avec la nature, maitrisant les secrets de la foret dense et des rivieres poissonneuses.§§A partir du premier millenaire de notre ere, des vagues successives de migrations bantoues venues du nord-est de l Afrique ont progressivement peuple la region. Ces peuples apportaient avec eux l agriculture, la metallurgie du fer et une organisation sociale complexe. Les Fang, les Mpongwe, les Punu, les Kota, les Tsogo, les Nzebi, les Teke et bien d autres groupes ethniques se sont ainsi installes sur ce territoire, formant la mosaique culturelle qui caracterise encore aujourd hui le Gabon.§§Chaque peuple developpa ses propres traditions, ses rites, sa langue et son organisation politique. Des chefferies puissantes se constituerent le long des fleuves et de la cote atlantique, controlant le commerce du sel, du poisson seche, des etoffes de raphia et du bois precieux."},
+{nom:"Chapitre 02 - 1472, la decouverte portugaise",prix:0,desc:"En 1472, les navigateurs portugais, lances dans leur grande entreprise d exploration des cotes africaines, atteignirent l estuaire d un fleuve majestueux qu ils baptiserent du nom de Gabao. Ce mot portugais signifie manteau a capuche, en reference a la forme de l estuaire.§§Les Portugais ne s installerent pas durablement, mais ils etablirent des comptoirs commerciaux et initierent des echanges avec les populations locales. Ils achetaient de l ivoire, du bois precieux, du poivre et des esclaves en echange de tissus, de perles, d alcool et d armes a feu.§§D autres nations europeennes suivirent : les Hollandais, les Anglais et les Francais vinrent tour a tour sur ces cotes pour y commercer. Le nom Gabon resta attache a cette terre et a son estuaire."},
+{nom:"Chapitre 03 - XVIIe et XIXe siecles, la traite negriere",prix:0,desc:"Du XVIIe au XIXe siecle, la traite negriere atlantique marqua profondement le territoire gabonais. Les Europeens organiserent la deportation massive d Africains vers les Ameriques. Le Gabon devint l une des regions d approvisionnement en esclaves.§§Des chefs locaux participerent a ce commerce, capturant des prisonniers de guerre ou des personnes endettees. Cette periode tragique provoqua des deplacements massifs de populations et un bouleversement profond des structures sociales.§§Des le debut du XIXe siecle, un mouvement abolitionniste se developpa en Europe. En 1815, le Congres de Vienne condamna la traite negriere. Les premieres patrouilles navales anti-esclavagistes sillonnerent les cotes gabonaises."},
+{nom:"Chapitre 04 - 1839, le traite avec le roi Denis",prix:0,desc:"En 1839, le capitaine de vaisseau francais Edouard Bouet-Willaumez signa un traite avec le roi Mpongwe Antoine Denis Rapontchombo, dit le roi Denis. Ce traite marquait le debut officiel de la presence francaise au Gabon.§§Le roi Denis vit dans cette alliance un moyen de proteger son peuple des razzias esclavagistes. En echange, il ceda a la France une portion de territoire sur la rive droite de l estuaire.§§En 1843, le fort d Aumale fut construit sur cette concession, marquant la presence militaire francaise permanente."},
+{nom:"Chapitre 05 - 1849, la fondation de Libreville",prix:0,desc:"En 1849, un evenement capital allait donner naissance a la capitale du Gabon. Le navire negrier bresilien Elizia fut arraisonne au large des cotes par la marine francaise. A son bord se trouvaient des dizaines d esclaves africains qui furent liberes.§§Ne pouvant les rapatrier, le commandant francais decida de les installer sur un plateau de la rive droite de l estuaire. Ces hommes et ces femmes fonderent un village qui prit le nom de Libreville, en hommage a leur liberation.§§La ville se developpa rapidement grace a sa position strategique, devenant un carrefour commercial entre l interieur du continent et la cote atlantique."},
+{nom:"Chapitre 06 - 1885 a 1910, l exploration de l interieur",prix:0,desc:"Apres s etre implantee sur la cote, la France entreprit d explorer l interieur du territoire gabonais. De grands explorateurs comme Pierre Savorgnan de Brazza jouerent un role determinant. Brazza remonta le fleuve Ogooue et etendit l influence francaise jusqu au coeur du continent.§§En 1885, la conference de Berlin partagea l Afrique. Le Gabon fut integre a l Afrique-Equatoriale francaise. Libreville devint la capitale de cette federation.§§L exploitation des richesses naturelles fut organisee au profit de la metropole. Des compagnies concessionnaires recoururent parfois au travail force."},
+{nom:"Chapitre 07 - 1914 a 1945, les Gabonais dans les guerres",prix:0,desc:"Lors de la Premiere Guerre mondiale, des milliers de Gabonais furent mobilises pour servir la France. Ils combattirent dans les tranchees d Europe, notamment dans le bataillon des tirailleurs senegalais.§§Pendant la Seconde Guerre mondiale, le Gabon joua un role particulier. En 1940, le gouverneur refusa de rallier le general de Gaulle. Une expedition militaire fut necessaire : ce fut la bataille de Libreville, du 8 au 12 novembre 1940.§§Apres la guerre, en 1946, le Gabon devint un Territoire d Outre-Mer francais. Leon M Ba fut elu depute a l Assemblee nationale francaise."},
+{nom:"Chapitre 08 - 17 aout 1960, l independance",prix:0,desc:"Le 17 aout 1960, le Gabon proclama son independance et devint une Republique souveraine. Leon M Ba, leader du Bloc democratique gabonais, en devint le premier president.§§L independance fut le fruit d un long processus politique engage apres la Seconde Guerre mondiale. En 1958, le Gabon choisit par referendum de devenir une Republique autonome au sein de la Communaute francaise. Deux ans plus tard, l independance totale etait proclamee.§§Cette periode fut marquee par un grand espoir : celui de construire une nation unie et prospere."},
+{nom:"Chapitre 09 - 1967 a 2009, l ere Omar Bongo",prix:0,desc:"En novembre 1967, a la mort de Leon M Ba, Albert-Bernard Bongo acceda a la presidence. Il avait a peine 32 ans. Il allait diriger le Gabon pendant plus de quarante ans.§§Des son arrivee, il instaura un regime de parti unique, le Parti democratique gabonais. En 1973, il se convertit a l islam et prit le nom d Omar Bongo.§§Le Gabon connut une croissance economique spectaculaire grace au petrole. Mais cette manne creusa de profondes inegalites sociales.§§En 1989, Omar Bongo introduisit le multipartisme. Il s eteignit le 8 juin 2009 dans une clinique espagnole."},
+{nom:"Chapitre 10 - 2009 a 2023, Ali Bongo et la transition",prix:0,desc:"Apres la mort d Omar Bongo, son fils Ali Bongo Ondimba fut elu president en 2009, dans un scrutin conteste. Il fut reelu en 2016 et 2023.§§En 2018, Ali Bongo fut victime d un accident vasculaire cerebral qui l eloigna du pouvoir pendant plusieurs mois.§§Le 30 aout 2023, un groupe de militaires dirige par le general Brice Clotaire Oligui Nguema renversa Ali Bongo et annonca la creation du CTRI. Cette transition militaire mit fin a 56 ans de pouvoir de la famille Bongo."},
+{nom:"Chapitre 11 - Le Gabon d aujourd hui",prix:0,desc:"Le Gabon d aujourd hui est un pays en pleine mutation. Dote d une richesse naturelle exceptionnelle (petrole, forets, minerais, biodiversite), il doit relever de nombreux defis.§§La diversification economique est au coeur des preoccupations. Le pays cherche a reduire sa dependance au petrole en developpant l agriculture, le tourisme, les energies renouvelables et l economie numerique.§§La preservation de l environnement est un enjeu majeur. Le Gabon, avec 88% de son territoire couvert de foret, est un acteur cle dans la lutte contre le changement climatique.§§La transition politique engagee en 2023 ouvre une nouvelle ere. L histoire du Gabon continue de s ecrire, portee par la resilience et l espoir de tout un peuple."}]},
+{id:'cul_masques',categorie:'culture',nom:"Masques et Sculptures du Gabon",ville:"National",quartier:"Tout le pays",tel:"",email:"",prix:"",photo:"https://images.unsplash.com/photo-1569336770403-d1d8c7cd8b4a?w=600",desc:"L art traditionnel gabonais est l un des plus riches et des plus fascinants d Afrique. Reconnu mondialement pour ses masques sacres et ses sculptures sur bois d une beaute saisissante, il incarne la profonde spiritualite et la creativite exceptionnelle des peuples qui habitent cette terre depuis des millenaires.§§Chaque masque, chaque statuette, chaque objet rituel est porteur d un sens profond : il incarne un esprit, un ancetre, une force de la nature. Les masques sont utilises lors de ceremonies d initiation, de deuil, de justice, de guerison ou de celebration.§§Ils ne sont jamais de simples objets decoratifs : ils sont vivants, charges de pouvoir, respectes et craints. Les peuples Fang, Punu, Kota, Tsogo, Mpongwe, Nzebi et bien d autres ont cree un art d une diversite remarquable, qui a influence de nombreux artistes occidentaux du XXe siecle, notamment les peintres cubistes comme Picasso.",articles:[
+{nom:"Chapitre 01 - Le masque Fang Ngil",prix:0,desc:"Le masque Ngil est l un des chefs-d oeuvre les plus celebres de l art africain. Il etait utilise par la societe secrete Ngil, une confrerie puissante qui avait pour mission de rendre la justice, de demasquer les sorciers et de maintenir l ordre social dans les communautes Fang.§§Ce masque se reconnait a son visage allonge, en forme de coeur, recouvert d une fine couche de kaolin blanc. Ce blanc symbolise le monde des esprits, des ancetres et de la sagesse.§§Le porteur du masque apparaissait lors de ceremonies nocturnes. Il incarnait l esprit du Ngil, qui venait du monde des ancetres pour retablir la verite.§§Le masque Ngil est aujourd hui considere comme un tresor national du Gabon. Un specimen exceptionnel a ete vendu aux encheres en 2006 pour plus de six millions d euros, un record pour un masque africain."},
+{nom:"Chapitre 02 - Le masque Punu Mukudj",prix:0,desc:"Le masque Mukudj, cree par le peuple Punu de la region de la Ngounie, est l un des masques les plus elegants de l art africain. Il represente l ideal de la beaute feminine : un visage serein, paisible, aux traits fins et harmonieux, entierement recouvert de kaolin blanc.§§Les yeux du Mukudj sont mi-clos, comme plonges dans une meditation profonde. Le front est orne d une coiffure complexe, composee de multiples tresses ou de fibres vegetales finement travaillees.§§Ce masque etait porte par des danseurs masculins, qui se produisaient juches sur de hautes echasses lors des ceremonies du mukudj. Ce ballet spectaculaire mettait en scene l esprit d une jeune femme decedee.§§Les masques Mukudj comptent parmi les pieces les plus recherchees par les collectionneurs du monde entier."},
+{nom:"Chapitre 03 - Le masque Kota Emboli",prix:0,desc:"Le masque Emboli, cree par les peuples Kota et Mahongwe de la vallee de l Ivindo, est un masque-heaume d un style tres particulier. Il se caracterise par sa forme angulaire, ses lignes geometriques et sa structure en bois recouverte de fines lamelles de cuivre et de laiton.§§Utilise lors des rites de circoncision de la societe secrete Satsi, l Emboli etait porte par un danseur qui parcourait le village en executant des mouvements rapides.§§Le masque Emboli etait etroitement associe au culte des reliques. Les Kota sont celebres pour leurs reliquaires en bois et en cuivre qui contenaient les ossements d ancetres veneres.§§L art Kota a profondement marque l art moderne. Les artistes cubistes s en sont largement inspires."},
+{nom:"Chapitre 04 - Le masque Tsogo Pove",prix:0,desc:"Chez les Tsogo et les peuples apparentes de la Ngounie, le masque Pove incarne Muhunzu, l ancetre primordial, le premier homme, le fondateur mythique de la societe initiatique Bwiti. Il est l un des masques les plus sacres du Gabon.§§Le visage du Pove est noirci au charbon de bois, ce qui lui donne une apparence sombre et mysterieuse. La coiffe est en fibres vegetales naturelles, parfois ornee de plumes et de cauris.§§Le Pove apparait lors des ceremonies de deuil, des initiations au Bwiti et des rituels de justice. Il veille au respect des traditions, pacifie les conflits, guide les ames des defunts.§§Le masque Pove est l ame du peuple Tsogo, le gardien de sa memoire, le lien vivant entre le passe et le present."},
+{nom:"Chapitre 05 - Les sculptures et statuettes rituelles",prix:0,desc:"Outre les masques, l art gabonais s exprime a travers une riche tradition de sculptures et de statuettes rituelles. Ces objets, tailles dans le bois, remplissent des fonctions multiples : protection, guerison, fecondite, divination, commemoration.§§Chez les Fang, les celebres statuettes bieri gardaient les ossements des ancetres et veillaient sur la famille. Leur style sobre et geometrique a profondement influence l art moderne europeen.§§Chez les Punu, les statuettes representant des femmes portant un enfant etaient utilisees lors des rites de fecondite. Chez les Nzebi et les Tsogo, les figures d ancetres jouaient un role central dans la vie spirituelle.§§Aujourd hui, cet heritage est preserve dans les musees nationaux et internationaux. Les sculpteurs gabonais contemporains perpetuent cette tradition tout en la reinventant."},
+{nom:"Chapitre 06 - L heritage et la transmission aujourd hui",prix:0,desc:"L art traditionnel gabonais n est pas un vestige du passe : il est vivant, il se transmet, il se transforme. De nombreux sculpteurs, danseurs, musiciens et inities perpetuent aujourd hui les traditions de leurs ancetres.§§Les ecoles d art de Libreville et de Franceville forment de jeunes createurs. Les festivals culturels celebrent chaque annee la richesse du patrimoine gabonais. Les villages continuent d organiser des ceremonies ou les masques dansent encore.§§Mais cet heritage est aussi menace : par la modernisation rapide, la mondialisation et la perte des langues. Preserver cet heritage est un defi majeur.§§Heureusement, de nombreuses initiatives voient le jour pour documenter, proteger et transmettre cet art exceptionnel. L avenir de l art gabonais dependra de la capacite de chaque Gabonais a faire vivre cette richesse unique au monde."}]},
 {id:'d30',categorie:'autre',nom:"Autre service",ville:"Libreville",quartier:"Centre",tel:"+241 00 00 00 00",email:"contact@autre.ga",prix:"-",desc:"Autres services",photo:"https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=600",articles:[]}
 ];
-  function renderNavbar(active){
+
+/* ================= ETAT GLOBAL ================= */
+var DATA_VERSION='v5_firebase';
+var _storedVersion=load('dataVersion','v0');
+var vendeurs;
+if(_storedVersion!==DATA_VERSION){
+vendeurs=DEMO_VENDEURS;save('vendeurs',vendeurs);save('dataVersion',DATA_VERSION);
+}else{
+vendeurs=load('vendeurs',DEMO_VENDEURS);
+}
+var role='client';
+var profil=load('profil',{nom:'Utilisateur',email:'',tel:'',tel2:'',ville:'Libreville',quartier:'',etab:'',photo:''});
+var factures=load('factures',[]);
+var chats=load('chats',{});
+var moyens=load('moyens',[]);
+var candidatures=load('candidatures',[]);
+var map=null,mapLayer=null;
+var gpsWatch=null,gpsActive=false;
+var currentJob=null;
+var isGuest=false;
+
+function uploadImage(input,hiddenId,previewId,isAvatar){
+var file=input.files[0];if(!file)return;
+var reader=new FileReader();
+reader.onload=function(e){var data=e.target.result;document.getElementById(hiddenId).value=data;var prev=document.getElementById(previewId);
+if(isAvatar){prev.innerHTML='<img src="'+data+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';}
+else{prev.innerHTML='<img src="'+data+'">';}toast('Image chargee');};
+reader.readAsDataURL(file);
+}
+
+function renderNavbar(active){
 var tabs=(ROLES[role]&&ROLES[role].type==='client')?TABS_CLIENT:TABS_VENDEUR;
 var h='';
 tabs.forEach(function(tb){h+='<button class="'+(active===tb[0]?'act':'')+'" onclick="show(\''+tb[0]+'\')"><span class="ic">'+tb[2]+'</span>'+tb[1]+'</button>';});
@@ -835,6 +974,7 @@ function findAccount(email){return getAccounts().find(function(a){return a.email
 function getSession(){return load('session',null);}
 function setSession(s){save('session',s);}
 function clearSession(){try{localStorage.removeItem('n241_session');}catch(e){}}
+
 function handleEmailAuth(mode){
 var email=document.getElementById('auEmail').value.trim().toLowerCase();
 var pass=document.getElementById('auPass').value.trim();
@@ -847,7 +987,7 @@ if(acc.pass!==pass){toast('Mot de passe incorrect',true);return;}
 setSession({email:acc.email,nom:acc.nom,tel:acc.tel,ville:acc.ville,role:acc.role,etab:acc.etab,photo:acc.photo||''});
 profil={nom:acc.nom,email:acc.email,tel:acc.tel,ville:acc.ville||'Libreville',quartier:acc.quartier||'',etab:acc.etab||'',photo:acc.photo||''};
 save('profil',profil);role=acc.role||'client';toast('Bienvenue '+acc.nom);afterAuth();
-} else {
+}else{
 var nom=document.getElementById('auNom').value.trim();
 var etab=document.getElementById('auEtab').value.trim();
 var tel=document.getElementById('auTel').value.trim();
@@ -859,7 +999,10 @@ var newAcc={email:email,pass:pass,nom:nom,tel:tel,ville:ville,quartier:'',role:r
 var accs=getAccounts();accs.push(newAcc);saveAccounts(accs);
 setSession({email:newAcc.email,nom:newAcc.nom,tel:newAcc.tel,ville:newAcc.ville,role:newAcc.role,etab:newAcc.etab,photo:''});
 profil={nom:nom,email:email,tel:tel,ville:ville,quartier:'',etab:etab,photo:''};
-save('profil',profil);toast('Compte cree !');afterAuth();}
+save('profil',profil);
+/* Sync Firebase */
+if(fbReady){fbSave('accounts',email,newAcc);}
+toast('Compte cree !');afterAuth();}
 }
 function enterAsGuest(){
 isGuest=true;
@@ -883,6 +1026,7 @@ profil={nom:s.nom,email:s.email,tel:s.tel,ville:s.ville||'Libreville',quartier:s
 save('profil',profil);role=s.role||'client';afterAuth();
 }
 function logoutComplet(){clearSession();save('guestMode',false);isGuest=false;pageStack=[];toast('Deconnecte');show('login');checkSession();}
+
 function renderHomeJobs(){
 var box=document.getElementById('homeJobs');if(!box)return;
 var jobs=vendeurs.filter(function(v){return v.categorie==='recrutement';});
@@ -921,7 +1065,9 @@ function envoyerCandidature(){
 var nom=document.getElementById('postNom').value.trim();var tel=document.getElementById('postTel').value.trim();
 if(!nom||!tel){toast('Nom et tel obligatoires',true);return;}
 candidatures.push({job:currentJob.nom,nom:nom,tel:tel,date:new Date().toLocaleString('fr-FR')});
-save('candidatures',candidatures);toast('Candidature envoyee !');
+save('candidatures',candidatures);
+if(fbReady){fbSave('config','candidatures',candidatures);}
+toast('Candidature envoyee !');
 setTimeout(function(){show('categorie','recrutement');},1200);
 }
 function renderSearchResults(){
@@ -973,10 +1119,9 @@ function renderProgrammeBateau(){
 return '<div class="infoBox"><div class="fw">🚢 Logimar 241</div><div class="cs">Tel : +241 65 95 90 15</div></div><button class="backBtn" onclick="goBack()">&#8592; Retour</button>';
 }
 
-/* ============ MODE LECTURE - SEPARATEUR §§ (B) ============ */
+/* ============ MODE LECTURE avec §§ ============ */
 function renderReadingArticle(article){
 var texte=article.desc||'';
-/* Multi-separateurs : §§ prioritaire + fallbacks */
 var paragraphes=texte.split(/§§|\n\s*\n|\\n\\n/g).map(function(p){return p.trim();}).filter(function(p){return p.length>0;});
 if(paragraphes.length===0){paragraphes=[texte];}
 var bodyHtml='';
@@ -1031,13 +1176,14 @@ var nom=document.getElementById('piNom').value.trim();var tel=document.getElemen
 if(!nom){toast('Nom obligatoire',true);return;}
 if(!tel){toast('Tel obligatoire',true);return;}
 var v=monProfilVendeur();
-var obj={id:v?v.id:'v'+Date.now(),categorie:role,nom:nom,desc:document.getElementById('piDesc').value.trim(),ville:document.getElementById('piVille').value.trim()||'Libreville',quartier:document.getElementById('piQuartier').value.trim(),tel:tel,email:document.getElementById('piEmail').value.trim(),photo:document.getElementById('piPhotoUrl').value.trim(),prix:document.getElementById('piPrix').value.trim()?document.getElementById('piPrix').value.trim()+' FCFA':'',articles:v?(v.articles||[]):[]};
+var obj={id:v?v.id:'v'+Date.now(),categorie:role,nom:nom,desc:document.getElementById('piDesc').value.trim(),ville:document.getElementById('piVille').value.trim()||'Libreville',quartier:document.getElementById('piQuartier').value.trim(),tel:tel,email:document.getElementById('piEmail').value.trim(),photo:document.getElementById('piPhotoUrl').value.trim(),prix:document.getElementById('piPrix').value.trim()?document.getElementById('piPrix').value.trim()+' FCFA':'',articles:v?(v.articles||[]):[],ownerEmail:profil.email};
 if(v){var i=vendeurs.findIndex(function(x){return x.id===v.id;});vendeurs[i]=obj;}
 else vendeurs.push(obj);
-save('vendeurs',vendeurs);toast('Fiche enregistree !');
-setTimeout(function(){show('pro');},600);
+save('vendeurs',vendeurs);
+if(fbReady){toast('Synchronisation...');fbSave('vendeurs',obj.id,obj).then(function(ok){if(ok){toast('✅ Enregistre et partage !');}else{toast('Enregistre en local');}setTimeout(function(){show('pro');},900);});}
+else{toast('Fiche enregistree');setTimeout(function(){show('pro');},600);}
 }
-function deletePro(){if(!confirm('Supprimer ?'))return;var v=monProfilVendeur();if(!v)return;vendeurs=vendeurs.filter(function(x){return x.id!==v.id;});save('vendeurs',vendeurs);toast('Supprime');setTimeout(function(){show('home');},600);}
+function deletePro(){if(!confirm('Supprimer ?'))return;var v=monProfilVendeur();if(!v)return;vendeurs=vendeurs.filter(function(x){return x.id!==v.id;});save('vendeurs',vendeurs);if(fbReady){db.collection('vendeurs').doc(v.id).delete();}toast('Supprime');setTimeout(function(){show('home');},600);}
 function renderProArticles(){
 var v=monProfilVendeur();
 if(!v){document.getElementById('proArtList').innerHTML='<div class="emp">Enregistrez vos infos</div>';return;}
@@ -1054,9 +1200,10 @@ if(!v.articles)v.articles=[];
 v.articles.push({nom:nom,prix:prix,desc:document.getElementById('paDesc').value.trim()});
 var i=vendeurs.findIndex(function(x){return x.id===v.id;});vendeurs[i]=v;save('vendeurs',vendeurs);
 document.getElementById('paNom').value='';document.getElementById('paPrix').value='';document.getElementById('paDesc').value='';
-toast('Offre ajoutee');renderProArticles();
+if(fbReady){fbSave('vendeurs',v.id,v).then(function(){toast('Offre ajoutee et partagee !');renderProArticles();});}
+else{toast('Offre ajoutee');renderProArticles();}
 }
-function delProArticle(i){var v=monProfilVendeur();if(!v)return;v.articles.splice(i,1);var idx=vendeurs.findIndex(function(x){return x.id===v.id;});vendeurs[idx]=v;save('vendeurs',vendeurs);renderProArticles();toast('Supprime');}
+function delProArticle(i){var v=monProfilVendeur();if(!v)return;v.articles.splice(i,1);var idx=vendeurs.findIndex(function(x){return x.id===v.id;});vendeurs[idx]=v;save('vendeurs',vendeurs);if(fbReady){fbSave('vendeurs',v.id,v);}renderProArticles();toast('Supprime');}
 function renderConvs(){
 var list=vendeurs.slice(0,12);var h='';
 list.forEach(function(v){h+='<div class="card" onclick="openChat(\''+v.nom.replace(/'/g,'')+'\')"><div class="row"><div><div class="fw">'+((ROLES[v.categorie]||{}).ic||'')+' '+v.nom+'</div><div class="cs">'+v.ville+'</div></div><span>&gt;</span></div></div>';});
@@ -1081,8 +1228,10 @@ function envoyerMessage(){
 var inp=document.getElementById('chatInput');var tx=inp.value.trim();if(!tx)return;
 var nom=document.getElementById('chatTitle').textContent;
 if(!chats[nom])chats[nom]=[];
-chats[nom].push({moi:true,txt:tx});save('chats',chats);inp.value='';renderChat(nom);
-setTimeout(function(){chats[nom].push({moi:false,txt:'Merci.'});save('chats',chats);renderChat(nom);},1000);
+chats[nom].push({moi:true,txt:tx,date:Date.now(),from:profil.email||'invite'});
+save('chats',chats);inp.value='';renderChat(nom);
+if(fbReady){fbSave('config','chats',chats);}
+setTimeout(function(){chats[nom].push({moi:false,txt:'Merci.',date:Date.now()});save('chats',chats);if(fbReady){fbSave('config','chats',chats);}renderChat(nom);},1000);
 }
 function renderFactures(){
 var h='';
@@ -1159,7 +1308,8 @@ var d=document.getElementById('taxiDest').value.trim();var tel=document.getEleme
 if(!d||!tel){toast('Remplissez',true);return;}
 var prix=1500+Math.floor(Math.random()*3000);
 factures.unshift({num:'FCT'+Math.floor(Math.random()*900000+100000),type:'Course taxi',date:new Date().toLocaleString('fr-FR'),moyen:'Especes',total:prix});
-save('factures',factures);toast('Course demandee : '+prix+' F');
+save('factures',factures);if(fbReady){fbSave('config','factures',factures);}
+toast('Course demandee : '+prix+' F');
 setTimeout(function(){show('factures');},800);
 }
 function envoyerColis(){
@@ -1188,39 +1338,74 @@ var tx=document.getElementById('toast');
 tx.textContent=msg;tx.classList.toggle('err',!!err);tx.classList.add('on');
 setTimeout(function(){tx.classList.remove('on');},2400);
 }
-function uploadImage(input,hiddenId,previewId,isAvatar){
-var file=input.files[0];if(!file)return;
-var reader=new FileReader();
-reader.onload=function(e){var data=e.target.result;document.getElementById(hiddenId).value=data;var prev=document.getElementById(previewId);
-if(isAvatar){prev.innerHTML='<img src="'+data+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';}
-else{prev.innerHTML='<img src="'+data+'">';}toast('Image chargee');};
-reader.readAsDataURL(file);
-}
 
-/* ================= DONNEES (avec §§ comme separateur) ================= */
-var DATA_VERSION='v4_final';
-var _storedVersion=load('dataVersion','v0');
-var vendeurs;
-if(_storedVersion!==DATA_VERSION){
-vendeurs=DEMO_VENDEURS;save('vendeurs',vendeurs);save('dataVersion',DATA_VERSION);
-}else{
-vendeurs=load('vendeurs',DEMO_VENDEURS);
+/* ================= NOTIFICATIONS TEMPS REEL ================= */
+function demarrerNotifications(){
+if(!fbReady){console.log("Notifications : Firebase non connecte");return;}
+console.log("Demarrage notifications temps reel");
+/* Ecouter les vendeurs */
+var firstLoad=true;
+fbWatchCollection('vendeurs',function(list){
+if(!list||list.length===0)return;
+var nouveaux=[];
+list.forEach(function(v){
+if(seenVendeurs.indexOf(v.id)<0){
+seenVendeurs.push(v.id);
+if(!firstLoad){
+nouveaux.push(v);
 }
-var role='client';
-var profil=load('profil',{nom:'Utilisateur',email:'',tel:'',tel2:'',ville:'Libreville',quartier:'',etab:'',photo:''});
-var factures=load('factures',[]);
-var chats=load('chats',{});
-var moyens=load('moyens',[]);
-var candidatures=load('candidatures',[]);
-var map=null,mapLayer=null;
-var gpsWatch=null,gpsActive=false;
-var currentJob=null;
-var isGuest=false;
+}
+});
+/* Mettre a jour la liste globale */
+if(list.length>0){
+vendeurs=list;save('vendeurs',vendeurs);
+/* Rafraichir l'affichage si on est sur une page de liste */
+var active=document.querySelector('.page.on');
+if(active&&active.id==='pgCategorie'){var cat=currentArg;if(cat)renderCategorie(cat);}
+if(active&&active.id==='pgHome'){renderHomeJobs();}
+}
+/* Notifications popup pour nouveaux vendeurs */
+nouveaux.forEach(function(v){
+var n={title:'🆕 Nouveau vendeur',msg:v.nom+' ('+v.ville+')',date:new Date().toLocaleString('fr-FR')};
+notifList.push(n);
+notifToast(n.title,n.msg);
+updateNotifCount(notifList.length);
+});
+if(firstLoad){firstLoad=false;save('seenVendeurs',seenVendeurs);}
+else{save('seenVendeurs',seenVendeurs);}
+});
+/* Ecouter les chats */
+fbLoad('config','chats',{}).then(function(c){if(c&&Object.keys(c).length>0){chats=c;save('chats',chats);}});
+/* Ecouter les factures */
+fbLoad('config','factures',[]).then(function(f){if(f&&f.length>0){factures=f;save('factures',factures);}});
+/* Ecouter les candidatures */
+fbLoad('config','candidatures',[]).then(function(c){if(c&&c.length>0){candidatures=c;save('candidatures',candidatures);}});
+/* Watch chats pour notifications messages */
+if(db){
+db.collection('config').doc('chats').onSnapshot(function(doc){
+if(!doc.exists)return;
+var c=doc.data().data;
+if(!c)return;
+/* Detecter nouveaux messages non lus */
+var totalMsg=0;
+Object.keys(c).forEach(function(k){totalMsg+=c[k].length;});
+if(window._lastMsgCount&&totalMsg>window._lastMsgCount){
+notifToast('💬 Nouveau message','Quelqu un vous a ecrit');
+notifList.push({title:'💬 Nouveau message',msg:'Consultez la messagerie',date:new Date().toLocaleString('fr-FR')});
+updateNotifCount(notifList.length);
+}
+window._lastMsgCount=totalMsg;
+chats=c;save('chats',chats);
+});
+}
+}
 
 window.addEventListener('load',function(){
 initBgSlideshow();applyTheme();applyI18N();
+initNotifBell();
 setTimeout(function(){
 document.getElementById('splash').classList.add('hide');
+if(fbReady){demarrerNotifications();}
 if(load('guestMode',false)){enterAsGuest();return;}
 show('login');checkSession();
 },5000);
